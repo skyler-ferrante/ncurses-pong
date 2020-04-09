@@ -15,6 +15,18 @@ typedef struct _WIN_struct {
 	WIN_BORDER border;
 }WIN;
 
+typedef struct pong_game_struct {
+	int ball_velocity_x;
+	int ball_velocity_y;
+	WIN lstick;
+	WIN rstick;
+	WIN ball;
+	WIN middle_line;
+}PONG_GAME;
+
+void init_ncurses();
+void print_intro();
+void init_game(PONG_GAME *game);
 void init_stick(WIN *p_win);
 void init_ball(WIN *p_win);
 void init_middleline(WIN *p_win);
@@ -22,66 +34,19 @@ void print_win_params(WIN *p_win);
 void create_box(WIN *win, bool flag);
 void bounce_ball(WIN *win);
 void end_message(int lscore,int rscore,int bounces);
-
-const static int STICK_HEIGHT = 12;
-const static int STICK_WIDTH = 1;
+	
+const int STICK_HEIGHT = 12;
+int STICK_WIDTH = 1;
 
 int main(int argc, char *argv[])
 {
-	WIN lstick; //Declaring sprites
-	WIN rstick;
-	WIN ball;
-	WIN line;
+	init_ncurses();
+	print_intro();
 
-	initscr(); 			
-	start_color();	
-	cbreak();		
-	keypad(stdscr, TRUE);		
-	noecho();		
-	curs_set(0);	
 
-	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
-	init_pair(2, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
-	init_pair(3, COLOR_RED, COLOR_BLACK); 	 //Color for ball
+	PONG_GAME game;
+	init_game(&game);
 
-	attron(COLOR_PAIR(1));
-	printw("Press any key to play\n");
-	printw("By Skyler Ferrante");
-	attroff(COLOR_PAIR(1));
-
-	attron(COLOR_PAIR(2)); //Spells out pong, http://patorjk.com/software/taag/#p=display&f=Univers&t=PONG
-	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");   
-	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");  
-	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");  
-	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            \n"); 
-	mvprintw(LINES/2+4,COLS/2-27.5,"88\"\"\"\"\"\"\"    88          88  88   `8b  88  88      88888 \n"); 
-	mvprintw(LINES/2+5,COLS/2-27.5,"88           Y8,        ,8P  88    `8b 88  Y8,        88 \n"); 
-	mvprintw(LINES/2+6,COLS/2-27.5,"88            Y8a.    .a8P   88     `8888   Y8a.    .a88 \n"); 
-	mvprintw(LINES/2+7,COLS/2-27.5,"88             `\"Y8888Y\"'    88      `888    `\"Y88888P\" \n "); 
-	attroff(COLOR_PAIR(1));
-
-	getch();
-	clear();
-	nodelay(stdscr,TRUE);	
-
-	init_stick(&lstick); //Initialize left stick
-	lstick.startx = lstick.startx*.125; //Put left stick on the left side
-
-	init_stick(&rstick); 
-	rstick.startx = rstick.startx*.875;	
-
-	init_ball(&ball);
-	
-	init_middleline(&line);
-
-	attron(COLOR_PAIR(1)); 
-	printw("Press F1 to exit"); 
-	refresh();
-	attroff(COLOR_PAIR(1));
-
-	int ball_velocity_x = 1;
-	int ball_velocity_y = 1;
-	
 	int rscore = 0;
 	int lscore = 0;
 
@@ -89,10 +54,10 @@ int main(int argc, char *argv[])
 	int bounces = 0; //Amount of bounces
 	while((ch = getch()) != KEY_F(1))
 	{	
-		create_box(&line,TRUE); //Adds middle line to the screen
+		create_box(&game.middle_line,TRUE); //Adds middle line to the screen
 		
-		create_box(&lstick,FALSE); //Clears sticks from the screen
-		create_box(&rstick,FALSE);
+		create_box(&game.lstick,FALSE); //Clears sticks from the screen
+		create_box(&game.rstick,FALSE);
 		
 		switch(ch){ //Updates sticks position
 			case KEY_F(1):
@@ -100,83 +65,83 @@ int main(int argc, char *argv[])
 				endwin();
 				return 0;
 			case 119: //W
-				lstick.starty-=3; //Moves left stick up
+				game.lstick.starty-=3; //Moves left stick up
 				break;
 			case 115: //S
-				lstick.starty+=3;
+				game.lstick.starty+=3;
 				break;
 			case KEY_UP: //Arrow key up
-				rstick.starty-=3; //Moves right stick up
+				game.rstick.starty-=3; //Moves right stick up
 				break;
 			case KEY_DOWN:
-				rstick.starty+=3;
+				game.rstick.starty+=3;
 				break;
 		}
-		create_box(&lstick,TRUE); //Creates sticks with new position	
-		create_box(&rstick,TRUE);
+		create_box(&game.lstick,TRUE); //Creates sticks with new position	
+		create_box(&game.rstick,TRUE);
 
-		create_box(&ball,FALSE); //Clears box
-		ball.startx -= ball_velocity_x;//Calculates balls new position
-		ball.starty -= ball_velocity_y;
-		create_box(&ball,TRUE); //Creates box in new position
+		create_box(&game.ball,FALSE); //Clears box
+		game.ball.startx -= game.ball_velocity_x;//Calculates balls new position
+		game.ball.starty -= game.ball_velocity_y;
+		create_box(&game.ball,TRUE); //Creates box in new position
 
 		//Stops sticks from going off screen
-		if(lstick.starty > LINES-STICK_HEIGHT){
-			lstick.starty = LINES-STICK_HEIGHT;
+		if(game.lstick.starty > LINES-STICK_HEIGHT){
+			game.lstick.starty = LINES-STICK_HEIGHT;
 		}
-		if(lstick.starty < 0){
-			lstick.starty = 0;
+		if(game.lstick.starty < 0){
+			game.lstick.starty = 0;
 		}
 		
-		if(rstick.starty > LINES-STICK_HEIGHT){
-			rstick.starty = LINES-STICK_HEIGHT;
+		if(game.rstick.starty > LINES-STICK_HEIGHT){
+			game.rstick.starty = LINES-STICK_HEIGHT;
 		}
-		if(rstick.starty < 0){
-			rstick.starty = 0;
+		if(game.rstick.starty < 0){
+			game.rstick.starty = 0;
 		}
 
 		//Stops ball from going off screen (Vertical)
-		if(ball.starty > LINES-3){
-			ball.starty = LINES-3;
-			ball_velocity_y = -ball_velocity_y;
+		if(game.ball.starty > LINES-3){
+			game.ball.starty = LINES-3;
+			game.ball_velocity_y = -game.ball_velocity_y;
 		}
-		if(ball.starty < 0){
-			ball.starty = 0;
-			ball_velocity_y = -ball_velocity_y;
+		if(game.ball.starty < 0){
+			game.ball.starty = 0;
+			game.ball_velocity_y = -game.ball_velocity_y;
 		}
 		
 		//Bounce ball off of sticks
-		if((abs((lstick.startx+STICK_WIDTH-1)-ball.startx)<3 //Check if in the same x plane
-		&& lstick.starty<ball.starty && (lstick.starty+STICK_HEIGHT)>ball.starty) //Check if in the same y plane
- 		|| (abs((rstick.startx-1)-ball.startx )<3
-		&& rstick.starty<ball.starty && (rstick.starty+STICK_HEIGHT)>ball.starty))
+		if((abs((game.lstick.startx+STICK_WIDTH-1)-game.ball.startx)<3 //Check if in the same x plane
+		&& game.lstick.starty<game.ball.starty && (game.lstick.starty+STICK_HEIGHT)>game.ball.starty) //Check if in the same y plane
+ 		|| (abs((game.rstick.startx-1)-game.ball.startx )<3
+		&& game.rstick.starty<game.ball.starty && (game.rstick.starty+STICK_HEIGHT)>game.ball.starty))
 		{
 			//See which half we are on, just to make sure we don't collide with the ball twice
-			ball_velocity_x = (ball.startx>COLS/2) ? 1 : -1;
+			game.ball_velocity_x = (game.ball.startx>COLS/2) ? 1 : -1;
 			bounces++;
 		}		
 
 		//Check if ball went off screen (Horizontal)
-		if(ball.startx<1){
+		if(game.ball.startx<1){
 			attron(COLOR_PAIR(1));
 			lscore++;
 			mvprintw(1,COLS-1,"%i",lscore);
 			attroff(COLOR_PAIR(2));
-			create_box(&ball,FALSE);
-			ball.startx = COLS/2;
-			ball.starty = LINES/2;
+			create_box(&game.ball,FALSE);
+			game.ball.startx = COLS/2;
+			game.ball.starty = LINES/2;
 			if(lscore>=5){
 				end_message(lscore,rscore,bounces);
 				return 0;
 			}		
 		}
-		else if(ball.startx>COLS){
+		else if(game.ball.startx>COLS){
 			attron(COLOR_PAIR(1));
 			rscore++;
 			mvprintw(1,1,"%i",rscore);
 			attroff(COLOR_PAIR(2));
-			ball.startx = COLS/2;
-			ball.starty = LINES/2;
+			game.ball.startx = COLS/2;
+			game.ball.starty = LINES/2;
 			if(rscore>=5){
 				end_message(lscore,rscore,bounces);
 				return 0;
@@ -191,6 +156,46 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+void init_ncurses(){
+	initscr(); 			
+	start_color();	
+	cbreak();		
+	keypad(stdscr, TRUE);		
+	noecho();		
+	curs_set(0);	
+	
+	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
+	init_pair(2, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
+	init_pair(3, COLOR_RED, COLOR_BLACK); 	 //Color for ball
+
+	attron(COLOR_PAIR(1));
+	printw("Press any key to play\n");
+	printw("By Skyler Ferrante");
+	attroff(COLOR_PAIR(1));
+}
+
+void print_intro(){
+	attron(COLOR_PAIR(2)); //Spells out pong, http://patorjk.com/software/taag/#p=display&f=Univers&t=PONG
+	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");   
+	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");  
+	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");  
+	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            \n"); 
+	mvprintw(LINES/2+4,COLS/2-27.5,"88\"\"\"\"\"\"\"    88          88  88   `8b  88  88      88888 \n"); 
+	mvprintw(LINES/2+5,COLS/2-27.5,"88           Y8,        ,8P  88    `8b 88  Y8,        88 \n"); 
+	mvprintw(LINES/2+6,COLS/2-27.5,"88            Y8a.    .a8P   88     `8888   Y8a.    .a88 \n"); 
+	mvprintw(LINES/2+7,COLS/2-27.5,"88             `\"Y8888Y\"'    88      `888    `\"Y88888P\" \n "); 
+	attroff(COLOR_PAIR(1));
+
+	getch();
+	clear();
+	nodelay(stdscr,TRUE); //I wanted to put this in init_ncurses but then we could not pause during this function	
+	
+	attron(COLOR_PAIR(1)); 
+	printw("Press ESC to exit"); 
+	refresh();
+	attroff(COLOR_PAIR(1));
+}
+
 void end_message(int lscore,int rscore,int bounces){
 	endwin();
 	if(lscore==rscore){
@@ -202,6 +207,21 @@ void end_message(int lscore,int rscore,int bounces){
 	}
 	printf("Score was %i-%i\n",lscore,rscore);
 	printf("%i bounces\n",bounces);
+}
+
+void init_game(PONG_GAME *game){
+	init_stick(&game->lstick);
+	game->lstick.startx = game->lstick.startx*.125;
+
+	init_stick(&game->rstick);
+	game->rstick.startx = game->rstick.startx*.875;
+
+	init_ball(&game->ball);
+
+	init_middleline(&game->middle_line);
+
+	game->ball_velocity_x = 1;
+	game->ball_velocity_y = 1;
 }
 
 void init_stick(WIN *p_win)
