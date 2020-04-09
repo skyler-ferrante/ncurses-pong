@@ -56,12 +56,11 @@ int main(int argc, char *argv[])
 	init_game(&game);
 
 	int ch; //For user input in while loop
-	while((ch = getch()) != 27)
+	while((ch = getch()) != 27 && !game.is_done)
 	{
 		clear_shapes(&game);
 		update_sticks(&game,ch);
 		update_ball(&game);
-
 		draw_screen(&game);
 		usleep(30000);
 	}
@@ -256,16 +255,16 @@ void stop_ball_vertical(PONG_GAME *game){
 
 void stop_ball_horizontal(PONG_GAME *game){
 	if(game->ball.startx<1){
-		game->lscore++;
-		if(game->lscore>=5){
+		game->rscore++;
+		if(game->rscore>=5){
 			end_message(game->lscore,game->rscore,game->bounces);
 			game->is_done = true;
 			return;
 		}		
 	}
 	else if(game->ball.startx>COLS){
-		game->rscore++;
-		if(game->rscore>=5){
+		game->lscore++;
+		if(game->lscore>=5){
 			end_message(game->lscore,game->rscore,game->bounces);
 			game->is_done = true;
 			return;
@@ -275,6 +274,7 @@ void stop_ball_horizontal(PONG_GAME *game){
 	}
 	attron(COLOR_PAIR(1));
 	mvprintw(1,COLS-1,"%i",game->lscore);
+	mvprintw(1,1,"%i",game->rscore);
 	attroff(COLOR_PAIR(2));
 	create_box(&game->ball,FALSE); //undraw ball before moving
 	game->ball.startx = COLS/2;
