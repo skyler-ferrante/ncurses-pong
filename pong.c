@@ -18,6 +18,10 @@ typedef struct _WIN_struct {
 typedef struct pong_game_struct {
 	int ball_velocity_x;
 	int ball_velocity_y;
+	int rscore;
+	int lscore;
+	int bounces;
+	bool is_done;
 	WIN lstick;
 	WIN rstick;
 	WIN ball;
@@ -33,6 +37,11 @@ void init_middleline(WIN *p_win);
 void print_win_params(WIN *p_win);
 void create_box(WIN *win, bool flag);
 void bounce_ball(WIN *win);
+void draw_screen(PONG_GAME *game);
+void clear_shapes(PONG_GAME *game);
+void update_sticks(PONG_GAME *game,int ch);
+void update_ball(PONG_GAME *game);
+
 void end_message(int lscore,int rscore,int bounces);
 	
 const int STICK_HEIGHT = 12;
@@ -43,116 +52,22 @@ int main(int argc, char *argv[])
 	init_ncurses();
 	print_intro();
 
-
 	PONG_GAME game;
 	init_game(&game);
 
-	int rscore = 0;
-	int lscore = 0;
-
 	int ch; //For user input in while loop
-	int bounces = 0; //Amount of bounces
-	while((ch = getch()) != KEY_F(1))
-	{	
-		create_box(&game.middle_line,TRUE); //Adds middle line to the screen
-		
-		create_box(&game.lstick,FALSE); //Clears sticks from the screen
-		create_box(&game.rstick,FALSE);
-		
-		switch(ch){ //Updates sticks position
-			case KEY_F(1):
-				printf("User pressed F1 \n");
-				endwin();
-				return 0;
-			case 119: //W
-				game.lstick.starty-=3; //Moves left stick up
-				break;
-			case 115: //S
-				game.lstick.starty+=3;
-				break;
-			case KEY_UP: //Arrow key up
-				game.rstick.starty-=3; //Moves right stick up
-				break;
-			case KEY_DOWN:
-				game.rstick.starty+=3;
-				break;
-		}
-		create_box(&game.lstick,TRUE); //Creates sticks with new position	
-		create_box(&game.rstick,TRUE);
+	while((ch = getch()) != 27)
+	{
+		clear_shapes(&game);
+		update_sticks(&game,ch);
+		update_ball(&game);
 
-		create_box(&game.ball,FALSE); //Clears box
-		game.ball.startx -= game.ball_velocity_x;//Calculates balls new position
-		game.ball.starty -= game.ball_velocity_y;
-		create_box(&game.ball,TRUE); //Creates box in new position
-
-		//Stops sticks from going off screen
-		if(game.lstick.starty > LINES-STICK_HEIGHT){
-			game.lstick.starty = LINES-STICK_HEIGHT;
-		}
-		if(game.lstick.starty < 0){
-			game.lstick.starty = 0;
-		}
-		
-		if(game.rstick.starty > LINES-STICK_HEIGHT){
-			game.rstick.starty = LINES-STICK_HEIGHT;
-		}
-		if(game.rstick.starty < 0){
-			game.rstick.starty = 0;
-		}
-
-		//Stops ball from going off screen (Vertical)
-		if(game.ball.starty > LINES-3){
-			game.ball.starty = LINES-3;
-			game.ball_velocity_y = -game.ball_velocity_y;
-		}
-		if(game.ball.starty < 0){
-			game.ball.starty = 0;
-			game.ball_velocity_y = -game.ball_velocity_y;
-		}
-		
-		//Bounce ball off of sticks
-		if((abs((game.lstick.startx+STICK_WIDTH-1)-game.ball.startx)<3 //Check if in the same x plane
-		&& game.lstick.starty<game.ball.starty && (game.lstick.starty+STICK_HEIGHT)>game.ball.starty) //Check if in the same y plane
- 		|| (abs((game.rstick.startx-1)-game.ball.startx )<3
-		&& game.rstick.starty<game.ball.starty && (game.rstick.starty+STICK_HEIGHT)>game.ball.starty))
-		{
-			//See which half we are on, just to make sure we don't collide with the ball twice
-			game.ball_velocity_x = (game.ball.startx>COLS/2) ? 1 : -1;
-			bounces++;
-		}		
-
-		//Check if ball went off screen (Horizontal)
-		if(game.ball.startx<1){
-			attron(COLOR_PAIR(1));
-			lscore++;
-			mvprintw(1,COLS-1,"%i",lscore);
-			attroff(COLOR_PAIR(2));
-			create_box(&game.ball,FALSE);
-			game.ball.startx = COLS/2;
-			game.ball.starty = LINES/2;
-			if(lscore>=5){
-				end_message(lscore,rscore,bounces);
-				return 0;
-			}		
-		}
-		else if(game.ball.startx>COLS){
-			attron(COLOR_PAIR(1));
-			rscore++;
-			mvprintw(1,1,"%i",rscore);
-			attroff(COLOR_PAIR(2));
-			game.ball.startx = COLS/2;
-			game.ball.starty = LINES/2;
-			if(rscore>=5){
-				end_message(lscore,rscore,bounces);
-				return 0;
-			}		
-		}
+		draw_screen(&game);
 		usleep(30000);
 	}
 	clear();
-	printw("F1 was pressed");
-	usleep(10000);
-	end_message(lscore,rscore,bounces);
+	printf("ESC was pressed\n");
+	end_message(game.lscore,game.rscore,game.bounces);
 	return 0;
 }
 
@@ -210,6 +125,11 @@ void end_message(int lscore,int rscore,int bounces){
 }
 
 void init_game(PONG_GAME *game){
+	game->lscore = 0;
+	game->rscore = 0;
+	game->bounces = 0;
+	game->is_done = false;
+
 	init_stick(&game->lstick);
 	game->lstick.startx = game->lstick.startx*.125;
 
@@ -277,6 +197,113 @@ void init_middleline(WIN *p_win)
 	p_win->border.bl = ' ';
 	p_win->border.br = ' ';
 }
+
+void draw_screen(PONG_GAME *game){
+	create_box(&game->middle_line,TRUE); //Draws middle line
+	create_box(&game->lstick,TRUE); //Draws sticks	
+	create_box(&game->rstick,TRUE);
+	create_box(&game->ball,TRUE); //Draws ball
+}
+
+void clear_shapes(PONG_GAME *game){
+	create_box(&game->lstick,FALSE); //Clears sticks from the screen
+	create_box(&game->rstick,FALSE);
+	create_box(&game->ball,FALSE);
+}
+
+void update_sticks(PONG_GAME *game,int ch){
+	switch(ch){ //Updates sticks position
+		case 119: //W
+			game->lstick.starty-=3; //Moves left stick up
+			break;
+		case 115: //S
+			game->lstick.starty+=3;
+			break;
+		case KEY_UP: //Arrow key up
+			game->rstick.starty-=3; //Moves right stick up
+			break;
+		case KEY_DOWN: //Arrow key down
+			game->rstick.starty+=3;
+			break;
+	}
+	//Stops sticks from going off screen
+	if(game->lstick.starty > LINES-STICK_HEIGHT){
+		game->lstick.starty = LINES-STICK_HEIGHT;
+	}
+	if(game->lstick.starty < 0){
+		game->lstick.starty = 0;
+	}
+
+	if(game->rstick.starty > LINES-STICK_HEIGHT){
+		game->rstick.starty = LINES-STICK_HEIGHT;
+	}
+	if(game->rstick.starty < 0){
+		game->rstick.starty = 0;
+	}
+}
+
+void stop_ball_vertical(PONG_GAME *game){
+	//Stops ball from going off screen (Vertical)
+	if(game->ball.starty > LINES-3){
+		game->ball.starty = LINES-3;
+		game->ball_velocity_y = -game->ball_velocity_y;
+	}
+	if(game->ball.starty < 0){
+		game->ball.starty = 0;
+		game->ball_velocity_y = -game->ball_velocity_y;
+	}
+}
+
+void stop_ball_horizontal(PONG_GAME *game){
+	if(game->ball.startx<1){
+		game->lscore++;
+		if(game->lscore>=5){
+			end_message(game->lscore,game->rscore,game->bounces);
+			game->is_done = true;
+			return;
+		}		
+	}
+	else if(game->ball.startx>COLS){
+		game->rscore++;
+		if(game->rscore>=5){
+			end_message(game->lscore,game->rscore,game->bounces);
+			game->is_done = true;
+			return;
+		}		
+	}else{
+		return;
+	}
+	attron(COLOR_PAIR(1));
+	mvprintw(1,COLS-1,"%i",game->lscore);
+	attroff(COLOR_PAIR(2));
+	create_box(&game->ball,FALSE); //undraw ball before moving
+	game->ball.startx = COLS/2;
+	game->ball.starty = LINES/2;
+}
+
+void bounce_ball_off_stick(PONG_GAME *game){
+	//Bounce ball off of sticks
+	if((abs((game->lstick.startx+STICK_WIDTH-1)-game->ball.startx)<3 //Check if in the same x plane with lstick
+	&& game->lstick.starty<game->ball.starty && (game->lstick.starty+STICK_HEIGHT)>game->ball.starty) //Check if in the same y plane with rstick
+	|| (abs((game->rstick.startx-1)-game->ball.startx )<3 //Same thing but as above but with rstick
+	&& game->rstick.starty<game->ball.starty && (game->rstick.starty+STICK_HEIGHT)>game->ball.starty))
+	{
+		//See which half we are on, just to make sure we don't go the wrong way if we collide with the ball multiple times
+		game->ball_velocity_x = (game->ball.startx>COLS/2) ? 1 : -1;
+		game->bounces++;
+	}		
+}
+
+void update_ball(PONG_GAME *game){
+	//Calculates balls new position
+	game->ball.startx -= game->ball_velocity_x;
+	game->ball.starty -= game->ball_velocity_y;
+
+	stop_ball_vertical(game);
+	bounce_ball_off_stick(game);
+	stop_ball_horizontal(game);
+}
+
 void create_box(WIN *p_win, bool flag)
 {	int i, j;
 	int x, y, w, h;
