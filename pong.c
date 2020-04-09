@@ -18,6 +18,7 @@ typedef struct _WIN_struct {
 
 void init_stick(WIN *p_win);
 void init_ball(WIN *p_win);
+void init_middleline(WIN *p_win);
 void print_win_params(WIN *p_win);
 void create_box(WIN *win, bool flag);
 void bounce_ball(WIN *win);
@@ -26,55 +27,71 @@ const static int STICK_HEIGHT = 12;
 const static int STICK_WIDTH = 1;
 
 int main(int argc, char *argv[])
-{	
-	WIN lstick;
+{
+	WIN lstick; //Declaring sprites
 	WIN rstick;
 	WIN ball;
-	
-	initscr(); 	//Starts ncurses		
-	start_color();	//Starts color
-	cbreak();	//So we don't need to press enter	
+	WIN line;
 
-	keypad(stdscr, TRUE);	//So we can get F1	
-	noecho();		//Stops things that the user types from showing up
-	nodelay(stdscr,TRUE);	//Stops ncurses from pausing (for when we use getch())
-	curs_set(0);		//Makes the cursor blank
+	initscr(); 			
+	start_color();	
+	cbreak();		
+	keypad(stdscr, TRUE);		
+	noecho();		
+	curs_set(0);	
 
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
 	init_pair(2, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
 	init_pair(3, COLOR_RED, COLOR_BLACK); 	 //Color for ball
-	init_pair(4, COLOR_YELLOW, COLOR_BLACK); //Color for ball touching sticks
+
+	attron(COLOR_PAIR(1));
+	printw("Press any key to play\n");
+	printw("By Skyler Ferrante");
+	attroff(COLOR_PAIR(1));
+
+	attron(COLOR_PAIR(2));                                                          
+	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");   
+	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");  
+	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");  
+	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            \n"); 
+	mvprintw(LINES/2+4,COLS/2-27.5,"88\"\"\"\"\"\"\"    88          88  88   `8b  88  88      88888 \n"); 
+	mvprintw(LINES/2+5,COLS/2-27.5,"88           Y8,        ,8P  88    `8b 88  Y8,        88 \n"); 
+	mvprintw(LINES/2+6,COLS/2-27.5,"88            Y8a.    .a8P   88     `8888   Y8a.    .a88 \n"); 
+	mvprintw(LINES/2+7,COLS/2-27.5,"88             `\"Y8888Y\"'    88      `888    `\"Y88888P\" \n "); 
+	attroff(COLOR_PAIR(1));
+
+	getch();
+	clear();
+	nodelay(stdscr,TRUE);	
 
 	init_stick(&lstick); //Initialize left stick
-	lstick.startx = lstick.startx/8; //Put left stick on the left side
+	lstick.startx = lstick.startx*.125; //Put left stick on the left side
 
-	init_stick(&rstick);  //Initialize right stick
-	rstick.startx = rstick.startx*.875; //Put right stick on the left side
+	init_stick(&rstick); 
+	rstick.startx = rstick.startx*.875;	
 
-	init_ball(&ball); //Initialize ball
+	init_ball(&ball);
+	
+	init_middleline(&line);
 
-	attron(COLOR_PAIR(1)); //Sets color to cyan
+	attron(COLOR_PAIR(1)); 
 	printw("Press F1 to exit"); 
 	refresh();
 	attroff(COLOR_PAIR(1));
-
-	create_box(&lstick, TRUE); //Puts sprites on the screen
-	create_box(&rstick, TRUE);
-	create_box(&ball,   TRUE);
 
 	int ball_velocity_x = 1;
 	int ball_velocity_y = 1;
 	
 	int ch; //For user input in while loop
 	int bounces = 0; //Amount of bounces
-	while((ch = getch()) != KEY_F(1)) //Runs until user wants to quit (F1)
+	while((ch = getch()) != KEY_F(1))
 	{	
-		usleep(30000); //Pause (in microsecs)
+		create_box(&line,TRUE); //Adds middle line to the screen
 		
 		create_box(&lstick,FALSE); //Clears sticks from the screen
 		create_box(&rstick,FALSE);
 		
-		switch(ch){
+		switch(ch){ //Updates sticks position
 			case KEY_F(1):
 				printf("User pressed F1 \n");
 				endwin();
@@ -100,8 +117,7 @@ int main(int argc, char *argv[])
 		ball.starty -= ball_velocity_y;
 		create_box(&ball,TRUE); //Creates box in new position
 
-		//Stops sticks from going off screen/
-		////////////////////////////////////////////
+		//Stops sticks from going off screen
 		if(lstick.starty > LINES-STICK_HEIGHT){
 			lstick.starty = LINES-STICK_HEIGHT;
 		}
@@ -115,10 +131,8 @@ int main(int argc, char *argv[])
 		if(rstick.starty < 0){
 			rstick.starty = 0;
 		}
-		////////////////////////////////////////////
 
 		//Stops ball from going off screen (Vertical)
-		//////////////////////////////////////////
 		if(ball.starty > LINES-3){
 			ball.starty = LINES-3;
 			ball_velocity_y = -ball_velocity_y;
@@ -127,22 +141,13 @@ int main(int argc, char *argv[])
 			ball.starty = 0;
 			ball_velocity_y = -ball_velocity_y;
 		}
-		//////////////////////////////////////////
-
+		
 		//Bounce ball off of sticks
-		////////////////////////////////////////////////////////////////////////////	
 		if((abs((lstick.startx+STICK_WIDTH-1)-ball.startx)<3 //Check if in the same x plane
 		&& lstick.starty<ball.starty && (lstick.starty+STICK_HEIGHT)>ball.starty) //Check if in the same y plane
  		|| (abs((rstick.startx-1)-ball.startx )<3
 		&& rstick.starty<ball.starty && (rstick.starty+STICK_HEIGHT)>ball.starty))
 		{
-			
-			ball.colorp = 4;
-			create_box(&ball,TRUE);
-			refresh();
-			usleep(100000);
-			ball.colorp = 3;
-			
 			if(ball.startx>COLS/2){ //See which half we are on, just to make sure if collide with the ball twice
 				ball_velocity_x = 1;
 			}else{
@@ -150,10 +155,8 @@ int main(int argc, char *argv[])
 			}
 			bounces++;
 		}		
-		////////////////////////////////////////////////////////////////////////////	
 
 		//Check if ball went off screen (Horizontal)
-		//////////////////////////////////////////
 		if(ball.startx<0){
 			endwin();
 			printf("Right Player won\n");
@@ -166,8 +169,10 @@ int main(int argc, char *argv[])
 			printf("%i bounces \n",bounces);
 			return 0;
 		}
-		//////////////////////////////////////////
+		usleep(30000);
 	}
+	printf("F1 was pressed\n");
+	printf("%i bounces",bounces);
 	endwin();	
 	return 0;
 }
@@ -207,6 +212,23 @@ void init_ball(WIN *p_win)
 	p_win->border.br = '+';
 }
 
+void init_middleline(WIN *p_win)
+{
+	p_win->height = LINES;
+	p_win->width = 2;
+	p_win->starty = (LINES - p_win->height)/2;	
+	p_win->startx = (COLS - p_win->width)/2;
+	p_win->colorp = 3;
+
+	p_win->border.ls = '|';
+	p_win->border.rs = '|';
+	p_win->border.ts = ' ';
+	p_win->border.bs = ' ';
+	p_win->border.tl = ' ';
+	p_win->border.tr = ' ';
+	p_win->border.bl = ' ';
+	p_win->border.br = ' ';
+}
 void create_box(WIN *p_win, bool flag)
 {	int i, j;
 	int x, y, w, h;
@@ -234,7 +256,5 @@ void create_box(WIN *p_win, bool flag)
 			for(i = x; i <= x + w; ++i)
 				mvaddch(j, i, ' ');			
 	}
-	
-	//Getch also refresh's so we get flickering from calling refresh multiple times a frame
-	//refresh();
+	//Getch acts as a refresh, so we do not refresh here to prevent flickering
 }
