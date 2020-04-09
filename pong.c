@@ -1,7 +1,6 @@
 #include <ncurses.h>
-#include <stdlib.h>
+#include<stdlib.h>
 #include <unistd.h>
-#include <time.h>
 
 typedef struct _win_border_struct {
 	chtype 	ls, rs, ts, bs, 
@@ -22,6 +21,7 @@ void init_middleline(WIN *p_win);
 void print_win_params(WIN *p_win);
 void create_box(WIN *win, bool flag);
 void bounce_ball(WIN *win);
+void end_message(int lscore,int rscore,int bounces);
 
 const static int STICK_HEIGHT = 12;
 const static int STICK_WIDTH = 1;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	printw("By Skyler Ferrante");
 	attroff(COLOR_PAIR(1));
 
-	attron(COLOR_PAIR(2));                                                          
+	attron(COLOR_PAIR(2)); //Spells out pong, http://patorjk.com/software/taag/#p=display&f=Univers&t=PONG
 	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");   
 	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");  
 	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");  
@@ -82,6 +82,9 @@ int main(int argc, char *argv[])
 	int ball_velocity_x = 1;
 	int ball_velocity_y = 1;
 	
+	int rscore = 0;
+	int lscore = 0;
+
 	int ch; //For user input in while loop
 	int bounces = 0; //Amount of bounces
 	while((ch = getch()) != KEY_F(1))
@@ -148,34 +151,59 @@ int main(int argc, char *argv[])
  		|| (abs((rstick.startx-1)-ball.startx )<3
 		&& rstick.starty<ball.starty && (rstick.starty+STICK_HEIGHT)>ball.starty))
 		{
-			if(ball.startx>COLS/2){ //See which half we are on, just to make sure if collide with the ball twice
-				ball_velocity_x = 1;
-			}else{
-				ball_velocity_x = -1;
-			}
+			//See which half we are on, just to make sure we don't collide with the ball twice
+			ball_velocity_x = (ball.startx>COLS/2) ? 1 : -1;
 			bounces++;
 		}		
 
 		//Check if ball went off screen (Horizontal)
-		if(ball.startx<0){
-			endwin();
-			printf("Right Player won\n");
-			printf("%i bounces \n",bounces);
-			return 0;
+		if(ball.startx<1){
+			attron(COLOR_PAIR(1));
+			lscore++;
+			mvprintw(1,COLS-1,"%i",lscore);
+			attroff(COLOR_PAIR(2));
+			create_box(&ball,FALSE);
+			ball.startx = COLS/2;
+			ball.starty = LINES/2;
+			if(lscore>=5){
+				end_message(lscore,rscore,bounces);
+				return 0;
+			}		
 		}
 		else if(ball.startx>COLS){
-			endwin();
-			printf("Left Player won\n");
-			printf("%i bounces \n",bounces);
-			return 0;
+			attron(COLOR_PAIR(1));
+			rscore++;
+			mvprintw(1,1,"%i",rscore);
+			attroff(COLOR_PAIR(2));
+			ball.startx = COLS/2;
+			ball.starty = LINES/2;
+			if(rscore>=5){
+				end_message(lscore,rscore,bounces);
+				return 0;
+			}		
 		}
 		usleep(30000);
 	}
-	printf("F1 was pressed\n");
-	printf("%i bounces",bounces);
-	endwin();	
+	clear();
+	printw("F1 was pressed");
+	usleep(10000);
+	end_message(lscore,rscore,bounces);
 	return 0;
 }
+
+void end_message(int lscore,int rscore,int bounces){
+	endwin();
+	if(lscore==rscore){
+		printf("Tie game\n");
+	}else if(lscore>rscore){
+		printf("Left player wins\n");
+	}else{
+		printf("Right player wins\n");
+	}
+	printf("Score was %i-%i\n",lscore,rscore);
+	printf("%i bounces\n",bounces);
+}
+
 void init_stick(WIN *p_win)
 {
 	p_win->height = STICK_HEIGHT;
@@ -238,7 +266,7 @@ void create_box(WIN *p_win, bool flag)
 	w = p_win->width;
 	h = p_win->height;
 
-
+	//If flag is true, print p_win, else clear p_win
 	if(flag == TRUE)
 	{	
 		attron(COLOR_PAIR(p_win->colorp));
