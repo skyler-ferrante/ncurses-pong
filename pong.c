@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 		update_sticks(&game,ch);
 		update_ball(&game);
 		draw_screen(&game);
-		usleep(30000);
+		usleep(20000);
 	}
 	clear();
 	printf("ESC was pressed\n");
@@ -71,12 +71,12 @@ int main(int argc, char *argv[])
 }
 
 void init_ncurses(){
-	initscr(); 			
-	start_color();	
+	initscr();			
+	start_color();
 	cbreak();		
-	keypad(stdscr, TRUE);		
-	noecho();		
-	curs_set(0);	
+	keypad(stdscr, TRUE);
+	noecho();	
+	curs_set(0);
 	
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
 	init_pair(2, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
@@ -104,8 +104,8 @@ void print_intro(){
 	clear();
 	nodelay(stdscr,TRUE); //I wanted to put this in init_ncurses but then we could not pause during this function	
 	
-	attron(COLOR_PAIR(1)); 
-	printw("Press ESC to exit"); 
+	attron(COLOR_PAIR(1));
+	printw("Press ESC to exit");
 	refresh();
 	attroff(COLOR_PAIR(1));
 }
@@ -143,14 +143,7 @@ void init_game(PONG_GAME *game){
 	game->ball_velocity_y = 1;
 }
 
-void init_stick(WIN *p_win)
-{
-	p_win->height = STICK_HEIGHT;
-	p_win->width = STICK_WIDTH;
-	p_win->starty = (LINES - p_win->height)/2;	
-	p_win->startx = (COLS - p_win->width);
-	p_win->colorp = 2;
-
+void init_border(WIN *p_win){
 	p_win->border.ls = '|';
 	p_win->border.rs = '|';
 	p_win->border.ts = '-';
@@ -159,6 +152,16 @@ void init_stick(WIN *p_win)
 	p_win->border.tr = '+';
 	p_win->border.bl = '+';
 	p_win->border.br = '+';
+}
+
+void init_stick(WIN *p_win)
+{
+	p_win->height = STICK_HEIGHT;
+	p_win->width = STICK_WIDTH;
+	p_win->starty = (LINES - p_win->height)/2;	
+	p_win->startx = (COLS - p_win->width);
+	p_win->colorp = 2;
+	init_border(p_win);
 }
 
 void init_ball(WIN *p_win)
@@ -168,33 +171,17 @@ void init_ball(WIN *p_win)
 	p_win->starty = (LINES - p_win->height)/2;	
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 3;
-
-	p_win->border.ls = '|';
-	p_win->border.rs = '|';
-	p_win->border.ts = '-';
-	p_win->border.bs = '-';
-	p_win->border.tl = '+';
-	p_win->border.tr = '+';
-	p_win->border.bl = '+';
-	p_win->border.br = '+';
+	init_border(p_win);
 }
 
 void init_middleline(WIN *p_win)
 {
-	p_win->height = LINES;
+	p_win->height = LINES+2;
 	p_win->width = 2;
 	p_win->starty = (LINES - p_win->height)/2;	
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 3;
-
-	p_win->border.ls = '|';
-	p_win->border.rs = '|';
-	p_win->border.ts = ' ';
-	p_win->border.bs = ' ';
-	p_win->border.tl = ' ';
-	p_win->border.tr = ' ';
-	p_win->border.bl = ' ';
-	p_win->border.br = ' ';
+	init_border(p_win);
 }
 
 void draw_screen(PONG_GAME *game){
@@ -263,20 +250,16 @@ void stop_ball_vertical(PONG_GAME *game){
 void stop_ball_horizontal(PONG_GAME *game){
 	if(game->ball.startx<1){
 		game->rscore++;
-		if(game->rscore>=5){
-			game->is_done = true;
-			return;
-		}		
 	}
 	else if(game->ball.startx>COLS){
 		game->lscore++;
-		if(game->lscore>=5){
-			game->is_done = true;
-			return;
-		}		
 	}else{
 		return;
 	}
+	if(game->rscore>=5 || game->lscore>=5){
+		game->is_done = true;
+		return;
+	}		
 	attron(COLOR_PAIR(1));
 	mvprintw(1,1,"%i",game->lscore);
 	mvprintw(1,COLS-1,"%i",game->rscore);
