@@ -210,7 +210,7 @@ void clear_shapes(PONG_GAME *game){
 	create_box(&game->ball,FALSE);
 }
 
-void update_sticks(PONG_GAME *game,int ch){
+void update_position(PONG_GAME *game,int ch){
 	switch(ch){ //Updates sticks position
 		case 119: //W
 			game->lstick.starty-=3; //Moves left stick up
@@ -225,7 +225,9 @@ void update_sticks(PONG_GAME *game,int ch){
 			game->rstick.starty+=3;
 			break;
 	}
-	//Stops sticks from going off screen
+}
+
+void stop_sticks_from_going_off_screen(PONG_GAME *game){
 	if(game->lstick.starty > LINES-STICK_HEIGHT){
 		game->lstick.starty = LINES-STICK_HEIGHT;
 	}
@@ -239,6 +241,11 @@ void update_sticks(PONG_GAME *game,int ch){
 	if(game->rstick.starty < 0){
 		game->rstick.starty = 0;
 	}
+}
+
+void update_sticks(PONG_GAME *game,int ch){
+	update_position(game,ch);
+	stop_sticks_from_going_off_screen(game);
 }
 
 void stop_ball_vertical(PONG_GAME *game){
@@ -257,7 +264,6 @@ void stop_ball_horizontal(PONG_GAME *game){
 	if(game->ball.startx<1){
 		game->rscore++;
 		if(game->rscore>=5){
-			end_message(game->lscore,game->rscore,game->bounces);
 			game->is_done = true;
 			return;
 		}		
@@ -265,7 +271,6 @@ void stop_ball_horizontal(PONG_GAME *game){
 	else if(game->ball.startx>COLS){
 		game->lscore++;
 		if(game->lscore>=5){
-			end_message(game->lscore,game->rscore,game->bounces);
 			game->is_done = true;
 			return;
 		}		
@@ -273,8 +278,8 @@ void stop_ball_horizontal(PONG_GAME *game){
 		return;
 	}
 	attron(COLOR_PAIR(1));
-	mvprintw(1,COLS-1,"%i",game->lscore);
-	mvprintw(1,1,"%i",game->rscore);
+	mvprintw(1,1,"%i",game->lscore);
+	mvprintw(1,COLS-1,"%i",game->rscore);
 	attroff(COLOR_PAIR(2));
 	create_box(&game->ball,FALSE); //undraw ball before moving
 	game->ball.startx = COLS/2;
