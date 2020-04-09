@@ -9,4 +9,4 @@ To install use
     
 To compile use 
 
-    $  gcc pong.c -lncurses 
+    $  make 
