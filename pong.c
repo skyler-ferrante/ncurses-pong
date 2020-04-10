@@ -27,6 +27,7 @@ typedef struct pong_game_struct {
 	WIN rstick;
 	WIN ball;
 	WIN middle_line;
+	WIN outer_line;
 }PONG_GAME;
 
 void init_ncurses();
@@ -48,7 +49,7 @@ void end_message(int lscore,int rscore,int bounces);
 const int STICK_HEIGHT = 12;
 int STICK_WIDTH = 1;
 const double BALL_START_SPEED_X = .5;
-const double BALL_START_SPEED_Y = .2; 
+const double BALL_START_SPEED_Y = .15; 
 
 int main(int argc, char *argv[])
 {
@@ -126,25 +127,6 @@ void end_message(int lscore,int rscore,int bounces){
 	printf("%i bounces\n",bounces);
 }
 
-void init_game(PONG_GAME *game){
-	game->lscore = 0;
-	game->rscore = 0;
-	game->bounces = 0;
-	game->is_done = false;
-
-	init_stick(&game->lstick);
-	game->lstick.startx = game->lstick.startx*.125;
-
-	init_stick(&game->rstick);
-	game->rstick.startx = game->rstick.startx*.875;
-
-	init_ball(&game->ball);
-
-	init_middleline(&game->middle_line);
-
-	game->ball_velocity_x = BALL_START_SPEED_X;
-	game->ball_velocity_y = BALL_START_SPEED_Y;
-}
 
 void init_border(WIN *p_win){
 	p_win->border.ls = '|';
@@ -173,11 +155,11 @@ void init_ball(WIN *p_win)
 	p_win->width = 2;
 	p_win->starty = (LINES - p_win->height)/2;	
 	p_win->startx = (COLS - p_win->width)/2;
-	p_win->colorp = 3;
+	p_win->colorp = 1;
 	init_border(p_win);
 }
 
-void init_middleline(WIN *p_win)
+void init_middle_line(WIN *p_win)
 {
 	p_win->height = LINES+2;
 	p_win->width = 2;
@@ -187,8 +169,42 @@ void init_middleline(WIN *p_win)
 	init_border(p_win);
 }
 
+void init_outer_line(WIN *p_win)
+{
+	p_win->height = LINES-1;
+	p_win->width = COLS-1;
+	p_win->starty = (LINES - p_win->height)/2;	
+	p_win->startx = (COLS - p_win->width)/2;
+	p_win->colorp = 3;
+	init_border(p_win);
+}
+
+void init_game(PONG_GAME *game){
+	game->lscore = 0;
+	game->rscore = 0;
+	game->bounces = 0;
+	game->is_done = false;
+
+	init_stick(&game->lstick);
+	game->lstick.startx = game->lstick.startx*.125;
+
+	init_stick(&game->rstick);
+	game->rstick.startx = game->rstick.startx*.875;
+
+	init_ball(&game->ball);
+
+	init_middle_line(&game->middle_line);
+
+	init_outer_line(&game->outer_line);
+
+	game->ball_velocity_x = BALL_START_SPEED_X;
+	game->ball_velocity_y = BALL_START_SPEED_Y;
+}
+
+
 void draw_screen(PONG_GAME *game){
 	create_box(&game->middle_line,TRUE); //Draws middle line
+	create_box(&game->outer_line,TRUE);
 	create_box(&game->lstick,TRUE); //Draws sticks	
 	create_box(&game->rstick,TRUE);
 	create_box(&game->ball,TRUE); //Draws ball
