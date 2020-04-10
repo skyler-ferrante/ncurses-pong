@@ -1,5 +1,5 @@
 CXX	:=gcc
-CXXFLAGS:=-O2
+CXXFLAGS:=-O2 -Wall
 LDFLAGS	:=-lncurses
 
 TARGET	:=pong
@@ -13,4 +13,4 @@ clean:
 	rm -rf ${TARGET}
 
 ${TARGET}: % : %.c
-	${CXX} -o $@ ${CXXFLAGS} ${LDFLAGS} $^
+	${CXX} ${CXXFLAGS} $^ ${LDFLAGS}  -o $@
