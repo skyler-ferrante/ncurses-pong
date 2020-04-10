@@ -1,6 +1,8 @@
 #include <ncurses.h>
 #include<stdlib.h>
 #include <unistd.h>
+#include <math.h>
+#include <time.h>
 
 typedef struct _win_border_struct {
 	chtype 	ls, rs, ts, bs, 
@@ -9,15 +11,14 @@ typedef struct _win_border_struct {
 
 typedef struct _WIN_struct {
 
-	int startx, starty;
+	double startx, starty;
 	int height, width;
 	int colorp;
 	WIN_BORDER border;
 }WIN;
 
 typedef struct pong_game_struct {
-	int ball_velocity_x;
-	int ball_velocity_y;
+	float ball_velocity_x, ball_velocity_y;
 	int rscore;
 	int lscore;
 	int bounces;
@@ -46,6 +47,8 @@ void end_message(int lscore,int rscore,int bounces);
 	
 const int STICK_HEIGHT = 12;
 int STICK_WIDTH = 1;
+const double BALL_START_SPEED_X = .5;
+const double BALL_START_SPEED_Y = .2; 
 
 int main(int argc, char *argv[])
 {
@@ -62,7 +65,7 @@ int main(int argc, char *argv[])
 		update_sticks(&game,ch);
 		update_ball(&game);
 		draw_screen(&game);
-		usleep(20000);
+		usleep(6000);
 	}
 	clear();
 	printf("ESC was pressed\n");
@@ -139,8 +142,8 @@ void init_game(PONG_GAME *game){
 
 	init_middleline(&game->middle_line);
 
-	game->ball_velocity_x = 1;
-	game->ball_velocity_y = 1;
+	game->ball_velocity_x = BALL_START_SPEED_X;
+	game->ball_velocity_y = BALL_START_SPEED_Y;
 }
 
 void init_border(WIN *p_win){
@@ -237,8 +240,8 @@ void update_sticks(PONG_GAME *game,int ch){
 
 void stop_ball_vertical(PONG_GAME *game){
 	//Stops ball from going off screen (Vertical)
-	if(game->ball.starty > LINES-3){
-		game->ball.starty = LINES-3;
+	if(game->ball.starty > LINES-2){
+		game->ball.starty = LINES-2;
 		game->ball_velocity_y = -game->ball_velocity_y;
 	}
 	if(game->ball.starty < 0){
@@ -266,18 +269,25 @@ void stop_ball_horizontal(PONG_GAME *game){
 	attroff(COLOR_PAIR(2));
 	create_box(&game->ball,FALSE); //undraw ball before moving
 	game->ball.startx = COLS/2;
-	game->ball.starty = LINES/2;
+	srand(time(0));
+	game->ball.starty = LINES/2 + LINES*.2*pow(-1,rand());
+	game->ball_velocity_y = BALL_START_SPEED_Y * pow(-1,rand());
 }
 
 void bounce_ball_off_stick(PONG_GAME *game){
 	//Bounce ball off of sticks
-	if((abs((game->lstick.startx+STICK_WIDTH-1)-game->ball.startx)<3 //Check if in the same x plane with lstick
+	if((fabs((game->lstick.startx+STICK_WIDTH-1)-game->ball.startx)<3 //Check if in the same x plane with lstick
 	&& game->lstick.starty<game->ball.starty && (game->lstick.starty+STICK_HEIGHT)>game->ball.starty) //Check if in the same y plane with rstick
-	|| (abs((game->rstick.startx-1)-game->ball.startx )<3 //Same thing but as above but with rstick
+	|| (fabs((game->rstick.startx-1)-game->ball.startx )<3 //Same thing but as above but with rstick
 	&& game->rstick.starty<game->ball.starty && (game->rstick.starty+STICK_HEIGHT)>game->ball.starty))
 	{
 		//See which half we are on, just to make sure we don't go the wrong way if we collide with the ball multiple times
-		game->ball_velocity_x = (game->ball.startx>COLS/2) ? 1 : -1;
+		int temp = (game->ball.startx>COLS/2) ? 1 : -1;
+		game->ball_velocity_x = temp * fabs(game->ball_velocity_x); 
+		game->ball_velocity_y *= 1.1;
+		if( fabs(game->ball_velocity_y) > BALL_START_SPEED_Y*3 ){
+			game->ball_velocity_y = ( (game->ball_velocity_y>0) - (game->ball_velocity_y<0) ) ? BALL_START_SPEED_Y : -BALL_START_SPEED_Y;
+		}
 		game->bounces++;
 	}		
 }
