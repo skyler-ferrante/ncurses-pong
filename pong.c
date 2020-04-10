@@ -91,7 +91,7 @@ void init_ncurses(){
 
 void print_intro(){
 	attron(COLOR_PAIR(2)); //Spells out pong, http://patorjk.com/software/taag/#p=display&f=Univers&t=PONG
-	mvprintw(LINES/2,COLS/2-27.5,"	88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");
+	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");
 	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");
 	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");
 	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            \n");
@@ -257,8 +257,8 @@ void stop_ball_vertical(PONG_GAME *game){
 		game->ball.starty = LINES-2;
 		game->ball_velocity_y = -game->ball_velocity_y;
 	}
-	if(game->ball.starty < 0){
-		game->ball.starty = 0;
+	if(game->ball.starty < 1){
+		game->ball.starty = 1;
 		game->ball_velocity_y = -game->ball_velocity_y;
 	}
 }
@@ -281,6 +281,7 @@ void stop_ball_horizontal(PONG_GAME *game){
 	srand(time(0));
 	game->ball.starty = LINES/2 + LINES*.2*pow(-1,rand());
 	game->ball_velocity_y = BALL_START_SPEED_Y * pow(-1,rand());
+	usleep(1000000);
 }
 
 void bounce_ball_off_stick(PONG_GAME *game){
