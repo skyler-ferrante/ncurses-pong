@@ -297,8 +297,9 @@ void bounce_ball_off_stick(PONG_GAME *game){
 		int temp = (game->ball.startx>COLS/2) ? 1 : -1;
 		game->ball_velocity_x = temp * fabs(game->ball_velocity_x); 
 		game->ball_velocity_y *= 1.1;
-		if( fabs(game->ball_velocity_y) > BALL_START_SPEED_Y*3 ){
-			game->ball_velocity_y = ( (game->ball_velocity_y>0) - (game->ball_velocity_y<0) ) ? BALL_START_SPEED_Y : -BALL_START_SPEED_Y;
+		if( fabs(game->ball_velocity_y) > BALL_START_SPEED_Y*3 ){ //Make sure we Don't go faster than 3 * Start speed in the y direction
+ 			//Set gameball_velocity_y to BALL_START_SPEED_Y, but the same direction/sign
+			game->ball_velocity_y = ( (game->ball_velocity_y>0) - (game->ball_velocity_y<0) ) ? -BALL_START_SPEED_Y : BALL_START_SPEED_Y;
 		}
 		game->bounces++;
 	}		
