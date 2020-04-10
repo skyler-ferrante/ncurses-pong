@@ -5,7 +5,7 @@
 #include <time.h>
 
 typedef struct _win_border_struct {
-	chtype 	ls, rs, ts, bs, 
+	chtype 	ls, rs, ts, bs,
 	 	tl, tr, bl, br;
 }WIN_BORDER;
 
@@ -33,9 +33,6 @@ typedef struct pong_game_struct {
 void init_ncurses();
 void print_intro();
 void init_game(PONG_GAME *game);
-void init_stick(WIN *p_win);
-void init_ball(WIN *p_win);
-void init_middleline(WIN *p_win);
 void print_win_params(WIN *p_win);
 void create_box(WIN *win, bool flag);
 void bounce_ball(WIN *win);
@@ -45,11 +42,11 @@ void update_sticks(PONG_GAME *game,int ch);
 void update_ball(PONG_GAME *game);
 
 void end_message(int lscore,int rscore,int bounces);
-	
+
 const int STICK_HEIGHT = 12;
 int STICK_WIDTH = 1;
 const double BALL_START_SPEED_X = .5;
-const double BALL_START_SPEED_Y = .15; 
+const double BALL_START_SPEED_Y = .15;
 
 int main(int argc, char *argv[])
 {
@@ -75,11 +72,11 @@ int main(int argc, char *argv[])
 }
 
 void init_ncurses(){
-	initscr();			
+	initscr();
 	start_color();
-	cbreak();		
+	cbreak();
 	keypad(stdscr, TRUE);
-	noecho();	
+	noecho();
 	curs_set(0);
 	
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
@@ -94,14 +91,14 @@ void init_ncurses(){
 
 void print_intro(){
 	attron(COLOR_PAIR(2)); //Spells out pong, http://patorjk.com/software/taag/#p=display&f=Univers&t=PONG
-	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");   
-	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");  
-	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");  
-	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            \n"); 
-	mvprintw(LINES/2+4,COLS/2-27.5,"88\"\"\"\"\"\"\"    88          88  88   `8b  88  88      88888 \n"); 
-	mvprintw(LINES/2+5,COLS/2-27.5,"88           Y8,        ,8P  88    `8b 88  Y8,        88 \n"); 
-	mvprintw(LINES/2+6,COLS/2-27.5,"88            Y8a.    .a8P   88     `8888   Y8a.    .a88 \n"); 
-	mvprintw(LINES/2+7,COLS/2-27.5,"88             `\"Y8888Y\"'    88      `888    `\"Y88888P\" \n "); 
+	mvprintw(LINES/2,COLS/2-27.5,"	88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");
+	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");
+	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");
+	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            \n");
+	mvprintw(LINES/2+4,COLS/2-27.5,"88\"\"\"\"\"\"\"    88          88  88   `8b  88  88      88888 \n");
+	mvprintw(LINES/2+5,COLS/2-27.5,"88           Y8,        ,8P  88    `8b 88  Y8,        88 \n");
+	mvprintw(LINES/2+6,COLS/2-27.5,"88            Y8a.    .a8P   88     `8888   Y8a.    .a88 \n");
+	mvprintw(LINES/2+7,COLS/2-27.5,"88             `\"Y8888Y\"'    88      `888    `\"Y88888P\" \n ");
 	attroff(COLOR_PAIR(1));
 
 	getch();
@@ -148,7 +145,7 @@ void init_ball(WIN *p_win)
 {
 	p_win->height = 2;
 	p_win->width = 2;
-	p_win->starty = (LINES - p_win->height)/2;	
+	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 1;
 	init_border(p_win);
@@ -158,7 +155,7 @@ void init_middle_line(WIN *p_win)
 {
 	p_win->height = LINES+2;
 	p_win->width = 2;
-	p_win->starty = (LINES - p_win->height)/2;	
+	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 3;
 	init_border(p_win);
@@ -168,7 +165,7 @@ void init_outer_line(WIN *p_win)
 {
 	p_win->height = LINES-1;
 	p_win->width = COLS-1;
-	p_win->starty = (LINES - p_win->height)/2;	
+	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 3;
 	init_border(p_win);
@@ -205,7 +202,7 @@ void draw_screen(PONG_GAME *game){
 	attroff(COLOR_PAIR(2));
 	create_box(&game->middle_line,TRUE); //Draws middle line
 	create_box(&game->outer_line,TRUE);
-	create_box(&game->lstick,TRUE); //Draws sticks	
+	create_box(&game->lstick,TRUE); //Draws sticks
 	create_box(&game->rstick,TRUE);
 	create_box(&game->ball,TRUE); //Draws ball
 }
@@ -234,18 +231,18 @@ void update_position(PONG_GAME *game,int ch){
 }
 
 void stop_sticks_from_going_off_screen(PONG_GAME *game){
-	if(game->lstick.starty > LINES-STICK_HEIGHT){
-		game->lstick.starty = LINES-STICK_HEIGHT;
+	if(game->lstick.starty > LINES-STICK_HEIGHT-2){
+		game->lstick.starty = LINES-STICK_HEIGHT-2;
 	}
-	if(game->lstick.starty < 0){
-		game->lstick.starty = 0;
+	if(game->lstick.starty < 1){
+		game->lstick.starty = 1;
 	}
 
-	if(game->rstick.starty > LINES-STICK_HEIGHT){
-		game->rstick.starty = LINES-STICK_HEIGHT;
+	if(game->rstick.starty > LINES-STICK_HEIGHT-2){
+		game->rstick.starty = LINES-STICK_HEIGHT-2;
 	}
-	if(game->rstick.starty < 0){
-		game->rstick.starty = 0;
+	if(game->rstick.starty < 1){
+		game->rstick.starty = 1;
 	}
 }
 
@@ -339,7 +336,7 @@ void create_box(WIN *p_win, bool flag)
 	}else{
 		for(j = y; j <= y + h; ++j)
 			for(i = x; i <= x + w; ++i)
-				mvaddch(j, i, ' ');			
+				mvaddch(j, i, ' ');
 	}
 	//Getch acts as a refresh, so we do not refresh here to prevent flickering
 }
