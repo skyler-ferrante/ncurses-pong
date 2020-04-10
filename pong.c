@@ -264,10 +264,10 @@ void stop_ball_vertical(PONG_GAME *game){
 }
 
 void stop_ball_horizontal(PONG_GAME *game){
-	if(game->ball.startx<1){
+	if(game->ball.startx<-3){
 		game->rscore++;
 	}
-	else if(game->ball.startx>COLS){
+	else if(game->ball.startx>COLS+3){
 		game->lscore++;
 	}else{
 		return;
@@ -277,11 +277,13 @@ void stop_ball_horizontal(PONG_GAME *game){
 		return;
 	}		
 	create_box(&game->ball,FALSE); //undraw ball before moving
-	game->ball.startx = COLS/2;
+	game->ball.startx = COLS/2 - game->ball.width/2;
 	srand(time(0));
 	game->ball.starty = LINES/2 + LINES*.2*pow(-1,rand());
 	game->ball_velocity_y = BALL_START_SPEED_Y * pow(-1,rand());
-	usleep(1000000);
+	draw_screen(game);
+	refresh();
+	sleep(1);
 }
 
 void bounce_ball_off_stick(PONG_GAME *game){
