@@ -33,9 +33,6 @@ typedef struct pong_game_struct {
 void init_ncurses();
 void print_intro();
 void init_game(PONG_GAME *game);
-void print_win_params(WIN *p_win);
-void create_box(WIN *win, bool flag);
-void bounce_ball(WIN *win);
 void draw_screen(PONG_GAME *game);
 void clear_shapes(PONG_GAME *game);
 void update_sticks(PONG_GAME *game,int ch);
@@ -193,6 +190,35 @@ void init_game(PONG_GAME *game){
 	game->ball_velocity_y = BALL_START_SPEED_Y;
 }
 
+void create_box(WIN *p_win, bool flag)
+{	int i, j;
+	int x, y, w, h;
+
+	x = p_win->startx;
+	y = p_win->starty;
+	w = p_win->width;
+	h = p_win->height;
+
+	//If flag is true, print p_win, else clear p_win
+	if(flag == TRUE)
+	{	
+		attron(COLOR_PAIR(p_win->colorp));
+		mvaddch(y, x, p_win->border.tl);
+		mvaddch(y, x + w, p_win->border.tr);
+		mvaddch(y + h, x, p_win->border.bl);
+		mvaddch(y + h, x + w, p_win->border.br);
+		mvhline(y, x + 1, p_win->border.ts, w - 1);
+		mvhline(y + h, x + 1, p_win->border.bs, w - 1);
+		mvvline(y + 1, x, p_win->border.ls, h - 1);
+		mvvline(y + 1, x + w, p_win->border.rs, h - 1);
+		attron(COLOR_PAIR(p_win->colorp));
+	}else{
+		for(j = y; j <= y + h; ++j)
+			for(i = x; i <= x + w; ++i)
+				mvaddch(j, i, ' ');
+	}
+	//Getch acts as a refresh, so we do not refresh here to prevent flickering
+}
 
 void draw_screen(PONG_GAME *game){
 	attron(COLOR_PAIR(1));
@@ -313,34 +339,4 @@ void update_ball(PONG_GAME *game){
 	stop_ball_vertical(game);
 	bounce_ball_off_stick(game);
 	stop_ball_horizontal(game);
-}
-
-void create_box(WIN *p_win, bool flag)
-{	int i, j;
-	int x, y, w, h;
-
-	x = p_win->startx;
-	y = p_win->starty;
-	w = p_win->width;
-	h = p_win->height;
-
-	//If flag is true, print p_win, else clear p_win
-	if(flag == TRUE)
-	{	
-		attron(COLOR_PAIR(p_win->colorp));
-		mvaddch(y, x, p_win->border.tl);
-		mvaddch(y, x + w, p_win->border.tr);
-		mvaddch(y + h, x, p_win->border.bl);
-		mvaddch(y + h, x + w, p_win->border.br);
-		mvhline(y, x + 1, p_win->border.ts, w - 1);
-		mvhline(y + h, x + 1, p_win->border.bs, w - 1);
-		mvvline(y + 1, x, p_win->border.ls, h - 1);
-		mvvline(y + 1, x + w, p_win->border.rs, h - 1);
-		attron(COLOR_PAIR(p_win->colorp));
-	}else{
-		for(j = y; j <= y + h; ++j)
-			for(i = x; i <= x + w; ++i)
-				mvaddch(j, i, ' ');
-	}
-	//Getch acts as a refresh, so we do not refresh here to prevent flickering
 }
