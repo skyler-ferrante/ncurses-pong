@@ -107,11 +107,6 @@ void print_intro(){
 	getch();
 	clear();
 	nodelay(stdscr,TRUE); //I wanted to put this in init_ncurses but then we could not pause during this function	
-	
-	attron(COLOR_PAIR(1));
-	printw("Press ESC to exit");
-	refresh();
-	attroff(COLOR_PAIR(1));
 }
 
 void end_message(int lscore,int rscore,int bounces){
@@ -203,6 +198,11 @@ void init_game(PONG_GAME *game){
 
 
 void draw_screen(PONG_GAME *game){
+	attron(COLOR_PAIR(1));
+	mvprintw(1,2,"Press ESC to exit");
+	mvprintw(2,2,"%i",game->lscore);
+	mvprintw(2,COLS-2,"%i",game->rscore);
+	attroff(COLOR_PAIR(2));
 	create_box(&game->middle_line,TRUE); //Draws middle line
 	create_box(&game->outer_line,TRUE);
 	create_box(&game->lstick,TRUE); //Draws sticks	
@@ -279,10 +279,6 @@ void stop_ball_horizontal(PONG_GAME *game){
 		game->is_done = true;
 		return;
 	}		
-	attron(COLOR_PAIR(1));
-	mvprintw(1,1,"%i",game->lscore);
-	mvprintw(1,COLS-1,"%i",game->rscore);
-	attroff(COLOR_PAIR(2));
 	create_box(&game->ball,FALSE); //undraw ball before moving
 	game->ball.startx = COLS/2;
 	srand(time(0));
