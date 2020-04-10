@@ -1,6 +1,6 @@
 CXX	:=gcc
 CXXFLAGS:=-O2 -Wall
-LDFLAGS	:=-lncurses
+LDFLAGS	:=-lncurses -lm
 
 TARGET	:=pong
 
