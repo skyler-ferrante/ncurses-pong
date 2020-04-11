@@ -9,4 +9,14 @@ To install use
     
 To compile use 
 
-    $  make 
+    $  make
+
+To use
+
+    $ ./pong
+
+To use another color set
+
+    $ ./pong -2 
+
+    $ ./pong -3

@@ -30,7 +30,7 @@ typedef struct pong_game_struct {
 	WIN outer_line;
 }PONG_GAME;
 
-void init_ncurses();
+void init_ncurses(int argc, char **argv);
 void print_intro();
 void init_game(PONG_GAME *game);
 void draw_screen(PONG_GAME *game);
@@ -45,9 +45,9 @@ int STICK_WIDTH = 1;
 const double BALL_START_SPEED_X = .5;
 const double BALL_START_SPEED_Y = .15;
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
-	init_ncurses();
+	init_ncurses(argc,argv);
 	print_intro();
 
 	PONG_GAME game;
@@ -72,28 +72,44 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void init_ncurses(){
+void init_ncurses(int argc,char *argv[]){
 	initscr();
 	start_color();
 	cbreak();
 	keypad(stdscr, TRUE);
 	noecho();
 	curs_set(0);
-	
-	init_pair(0, COLOR_WHITE, COLOR_BLACK);	 //Color for text
+	int c;
+	while((c = getopt(argc,argv,"123")) != -1){
+		switch(c){
+			case '2':
+				init_pair(1, COLOR_WHITE, COLOR_GREEN);	 //Color for text
+				init_pair(2, COLOR_WHITE, COLOR_WHITE);	 //Color for ball
+				init_pair(3, COLOR_WHITE, COLOR_WHITE);	 //Color for sticks
+				init_pair(4, COLOR_WHITE, COLOR_WHITE);  //Color for ball
+				init_pair(5, COLOR_WHITE, COLOR_GREEN);  //Color for background
+				return;
+			case '3':
+				init_pair(1, COLOR_WHITE, COLOR_BLUE);	 //Color for text
+				init_pair(2, COLOR_WHITE, COLOR_WHITE);	 //Color for ball
+				init_pair(3, COLOR_WHITE, COLOR_WHITE);	 //Color for sticks
+				init_pair(4, COLOR_WHITE, COLOR_WHITE);  //Color for ball
+				init_pair(5, COLOR_WHITE, COLOR_BLUE);  //Color for background
+				return;
+		}
+	}
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
-	init_pair(2, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
-	init_pair(3, COLOR_RED, COLOR_BLACK); 	 //Color for ball
+	init_pair(2, COLOR_CYAN, COLOR_BLACK);	 //Color for text
+	init_pair(3, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
+	init_pair(4, COLOR_RED, COLOR_BLACK); 	 //Color for ball
+}
 
+void print_intro(){
 	attron(COLOR_PAIR(1));
 	printw("(W/S for left player, key up/down for right player, p for pause)\n");
 	printw("Press any key to start\n");
 	printw("By Skyler Ferrante");
-	attroff(COLOR_PAIR(1));
-}
 
-void print_intro(){
-	attron(COLOR_PAIR(2)); //Spells out pong, http://patorjk.com/software/taag/#p=display&f=Univers&t=PONG
 	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");
 	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");
 	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");
@@ -140,7 +156,7 @@ void init_stick(WIN *p_win)
 	p_win->width = STICK_WIDTH;
 	p_win->starty = (LINES - p_win->height)/2;	
 	p_win->startx = (COLS - p_win->width);
-	p_win->colorp = 2;
+	p_win->colorp = 3;
 	init_border(p_win);
 }
 
@@ -150,7 +166,7 @@ void init_ball(WIN *p_win)
 	p_win->width = 2;
 	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
-	p_win->colorp = 1;
+	p_win->colorp = 2;
 	init_border(p_win);
 }
 
@@ -160,7 +176,7 @@ void init_middle_line(WIN *p_win)
 	p_win->width = 2;
 	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
-	p_win->colorp = 3;
+	p_win->colorp = 4;
 	init_border(p_win);
 }
 
@@ -170,7 +186,7 @@ void init_outer_line(WIN *p_win)
 	p_win->width = COLS-1;
 	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
-	p_win->colorp = 3;
+	p_win->colorp = 4;
 	init_border(p_win);
 }
 
@@ -219,11 +235,11 @@ void create_box(WIN *p_win, bool flag)
 		mvvline(y + 1, x + w, p_win->border.rs, h - 1);
 		attroff(COLOR_PAIR(p_win->colorp));
 	}else{
-		attron(COLOR_PAIR(1));
+		attron(COLOR_PAIR(5));
 		for(j = y; j <= y + h; ++j)
 			for(i = x; i <= x + w; ++i)
 				mvaddch(j, i, ' ');
-		attroff(COLOR_PAIR(1));
+		attroff(COLOR_PAIR(5));
 	}
 	//Getch acts as a refresh, so we do not refresh here to prevent flickering
 }
@@ -239,7 +255,8 @@ void draw_screen(PONG_GAME *game){
 	mvprintw(1,2,"Press ESC to exit");
 	mvprintw(2,2,"%i",game->lscore);
 	mvprintw(2,COLS-2,"%i",game->rscore);
-	attroff(COLOR_PAIR(2));
+	attroff(COLOR_PAIR(1));
+
 	create_box(&game->middle_line,TRUE); //Draws middle line
 	create_box(&game->outer_line,TRUE);
 	create_box(&game->lstick,TRUE); //Draws sticks
@@ -251,6 +268,7 @@ void clear_shapes(PONG_GAME *game){
 	create_box(&game->lstick,FALSE); //Clears sticks from the screen
 	create_box(&game->rstick,FALSE);
 	create_box(&game->ball,FALSE);
+	create_box(&game->outer_line,FALSE);
 }
 
 void update_position(PONG_GAME *game,int ch){
