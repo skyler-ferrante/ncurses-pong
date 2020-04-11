@@ -82,7 +82,7 @@ void init_ncurses(){
 	
 	init_pair(0, COLOR_WHITE, COLOR_BLACK);	 //Color for text
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
-	init_pair(2, COLOR_BLUE, COLOR_WHITE);	 //Color for sticks
+	init_pair(2, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
 	init_pair(3, COLOR_RED, COLOR_BLACK); 	 //Color for ball
 
 	attron(COLOR_PAIR(1));
