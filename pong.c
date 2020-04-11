@@ -71,6 +71,14 @@ int main(int argc, char **argv)
 	end_message(game.lscore,game.rscore,game.bounces);
 	return 0;
 }
+void clear_area(int x,int y, int w, int h)
+{
+	attron(COLOR_PAIR(5));
+	for(int j = y; j <= y + h; ++j)
+		for(int i = x; i <= x + w; ++i)
+			mvaddch(j, i, ' ');
+	attroff(COLOR_PAIR(5));
+}
 
 void init_ncurses(int argc,char *argv[]){
 	initscr();
@@ -105,19 +113,20 @@ void init_ncurses(int argc,char *argv[]){
 }
 
 void print_intro(){
+	clear_area(0,0,COLS,LINES);
 	attron(COLOR_PAIR(1));
-	printw("(W/S for left player, key up/down for right player, p for pause)\n");
-	printw("Press any key to start\n");
-	printw("By Skyler Ferrante");
+	mvprintw(0,0,"(W/S for left player, key up/down for right player, p for pause)");
+	mvprintw(1,0,"Press any key to start");
+	mvprintw(2,0,"By Skyler Ferrante");
 
-	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,\n");
-	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b\n");
-	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          \n");
-	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            \n");
-	mvprintw(LINES/2+4,COLS/2-27.5,"88\"\"\"\"\"\"\"    88          88  88   `8b  88  88      88888 \n");
-	mvprintw(LINES/2+5,COLS/2-27.5,"88           Y8,        ,8P  88    `8b 88  Y8,        88 \n");
-	mvprintw(LINES/2+6,COLS/2-27.5,"88            Y8a.    .a8P   88     `8888   Y8a.    .a88 \n");
-	mvprintw(LINES/2+7,COLS/2-27.5,"88             `\"Y8888Y\"'    88      `888    `\"Y88888P\" \n ");
+	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,");
+	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b");
+	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          ");
+	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            ");
+	mvprintw(LINES/2+4,COLS/2-27.5,"88\"\"\"\"\"\"\"    88          88  88   `8b  88  88      88888");
+	mvprintw(LINES/2+5,COLS/2-27.5,"88           Y8,        ,8P  88    `8b 88  Y8,        88 ");
+	mvprintw(LINES/2+6,COLS/2-27.5,"88            Y8a.    .a8P   88     `8888   Y8a.    .a88 ");
+	mvprintw(LINES/2+7,COLS/2-27.5,"88             `\"Y8888Y\"'    88      `888    `\"Y88888P\"");
 	attroff(COLOR_PAIR(1));
 
 	getch();
@@ -213,9 +222,8 @@ void init_game(PONG_GAME *game){
 }
 
 void create_box(WIN *p_win, bool flag)
-{	int i, j;
-	int x, y, w, h;
-
+{
+	int x,y,w,h;
 	x = p_win->startx;
 	y = p_win->starty;
 	w = p_win->width;
@@ -236,9 +244,7 @@ void create_box(WIN *p_win, bool flag)
 		attroff(COLOR_PAIR(p_win->colorp));
 	}else{
 		attron(COLOR_PAIR(5));
-		for(j = y; j <= y + h; ++j)
-			for(i = x; i <= x + w; ++i)
-				mvaddch(j, i, ' ');
+		clear_area(x,y,w,h);
 		attroff(COLOR_PAIR(5));
 	}
 	//Getch acts as a refresh, so we do not refresh here to prevent flickering
