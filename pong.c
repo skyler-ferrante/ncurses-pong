@@ -56,11 +56,15 @@ int main(int argc, char *argv[])
 	int ch; //For user input in while loop
 	while((ch = getch()) != 27 && !game.is_done)
 	{
-		clear_shapes(&game);
-		update_sticks(&game,ch);
-		update_ball(&game);
-		draw_screen(&game);
-		usleep(6000);
+		if(ch != (int)'p'){
+			clear_shapes(&game);
+			update_sticks(&game,ch);
+			update_ball(&game);
+			draw_screen(&game);
+			usleep(6000);
+		}else{
+			while((ch = getch()) != (int)'p'){}
+		}
 	}
 	clear();
 	printf("ESC was pressed\n");
@@ -76,12 +80,14 @@ void init_ncurses(){
 	noecho();
 	curs_set(0);
 	
+	init_pair(0, COLOR_WHITE, COLOR_BLACK);	 //Color for text
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
-	init_pair(2, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
+	init_pair(2, COLOR_BLUE, COLOR_WHITE);	 //Color for sticks
 	init_pair(3, COLOR_RED, COLOR_BLACK); 	 //Color for ball
 
 	attron(COLOR_PAIR(1));
-	printw("Press any key to play\n");
+	printw("(W/S for left player, key up/down for right player, p for pause)\n");
+	printw("Press any key to start\n");
 	printw("By Skyler Ferrante");
 	attroff(COLOR_PAIR(1));
 }
@@ -211,13 +217,21 @@ void create_box(WIN *p_win, bool flag)
 		mvhline(y + h, x + 1, p_win->border.bs, w - 1);
 		mvvline(y + 1, x, p_win->border.ls, h - 1);
 		mvvline(y + 1, x + w, p_win->border.rs, h - 1);
-		attron(COLOR_PAIR(p_win->colorp));
+		attroff(COLOR_PAIR(p_win->colorp));
 	}else{
+		attron(COLOR_PAIR(1));
 		for(j = y; j <= y + h; ++j)
 			for(i = x; i <= x + w; ++i)
 				mvaddch(j, i, ' ');
+		attroff(COLOR_PAIR(1));
 	}
 	//Getch acts as a refresh, so we do not refresh here to prevent flickering
+}
+
+void update_screen_sise(PONG_GAME *game){
+	game->middle_line.height = LINES;
+	game->outer_line.height = LINES;
+	game->outer_line.height = COLS;
 }
 
 void draw_screen(PONG_GAME *game){
@@ -241,10 +255,10 @@ void clear_shapes(PONG_GAME *game){
 
 void update_position(PONG_GAME *game,int ch){
 	switch(ch){ //Updates sticks position
-		case 119: //W
+		case (int)'w': //W
 			game->lstick.starty-=3; //Moves left stick up
 			break;
-		case 115: //S
+		case (int)'s': //S
 			game->lstick.starty+=3;
 			break;
 		case KEY_UP: //Arrow key up
@@ -260,14 +274,14 @@ void stop_sticks_from_going_off_screen(PONG_GAME *game){
 	if(game->lstick.starty > LINES-STICK_HEIGHT-2){
 		game->lstick.starty = LINES-STICK_HEIGHT-2;
 	}
-	if(game->lstick.starty < 1){
+	else if(game->lstick.starty < 1){
 		game->lstick.starty = 1;
 	}
 
 	if(game->rstick.starty > LINES-STICK_HEIGHT-2){
 		game->rstick.starty = LINES-STICK_HEIGHT-2;
 	}
-	if(game->rstick.starty < 1){
+	else if(game->rstick.starty < 1){
 		game->rstick.starty = 1;
 	}
 }
