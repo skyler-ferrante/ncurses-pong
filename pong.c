@@ -37,11 +37,12 @@ void draw_screen(PONG_GAME *game);
 void clear_shapes(PONG_GAME *game);
 void update_sticks(PONG_GAME *game,int ch);
 void update_ball(PONG_GAME *game);
-
 void end_message(int lscore,int rscore,int bounces);
 
 const int STICK_HEIGHT = 12;
-int STICK_WIDTH = 1;
+const int STICK_WIDTH = 1;
+int BALL_WIDTH = 2; //May want to change that based on themes
+int BALL_HEIGHT = 2;
 const double BALL_START_SPEED_X = .5;
 const double BALL_START_SPEED_Y = .15;
 
@@ -51,6 +52,7 @@ int main(int argc, char **argv)
 	print_intro();
 
 	PONG_GAME game;
+	
 	init_game(&game);
 
 	int ch; //For user input in while loop
@@ -88,28 +90,62 @@ void init_ncurses(int argc,char *argv[]){
 	noecho();
 	curs_set(0);
 	int c;
-	while((c = getopt(argc,argv,"123")) != -1){
+	//Color pair 1 is text
+	//Color pair 2 is ball
+	//Color pair 3 sticks
+	//Color pair 4 middle and outer lines
+	//Color pair 5 is for clearing screen 
+	while((c = getopt(argc,argv,"123456")) != -1){
 		switch(c){
 			case '2':
-				init_pair(1, COLOR_WHITE, COLOR_GREEN);	 //Color for text
-				init_pair(2, COLOR_WHITE, COLOR_WHITE);	 //Color for ball
-				init_pair(3, COLOR_WHITE, COLOR_WHITE);	 //Color for sticks
-				init_pair(4, COLOR_WHITE, COLOR_WHITE);  //Color for ball
-				init_pair(5, COLOR_WHITE, COLOR_GREEN);  //Color for background
+				init_pair(1, COLOR_WHITE, COLOR_BLUE);	
+				init_pair(2, COLOR_WHITE, COLOR_WHITE);
+				init_pair(3, COLOR_WHITE, COLOR_WHITE);
+				init_pair(4, COLOR_WHITE, COLOR_WHITE);
+				init_pair(5, COLOR_WHITE, COLOR_BLUE); 
 				return;
 			case '3':
-				init_pair(1, COLOR_WHITE, COLOR_BLUE);	 //Color for text
-				init_pair(2, COLOR_WHITE, COLOR_WHITE);	 //Color for ball
-				init_pair(3, COLOR_WHITE, COLOR_WHITE);	 //Color for sticks
-				init_pair(4, COLOR_WHITE, COLOR_WHITE);  //Color for ball
-				init_pair(5, COLOR_WHITE, COLOR_BLUE);  //Color for background
+				init_pair(1, COLOR_WHITE, COLOR_GREEN);	 
+				init_pair(2, COLOR_WHITE, COLOR_WHITE);	 
+				init_pair(3, COLOR_WHITE, COLOR_WHITE);	
+				init_pair(4, COLOR_WHITE, COLOR_WHITE);  
+				init_pair(5, COLOR_WHITE, COLOR_GREEN);  
+				BALL_WIDTH = 1;
+				BALL_HEIGHT = 1;
+				return;
+			case '4':
+				init_pair(1, COLOR_WHITE, COLOR_BLACK);	
+				init_pair(2, COLOR_WHITE, COLOR_WHITE);
+				init_pair(3, COLOR_WHITE, COLOR_WHITE);
+				init_pair(4, COLOR_WHITE, COLOR_WHITE);
+				init_pair(5, COLOR_WHITE, COLOR_BLACK);
+				BALL_WIDTH = 3;
+				return;
+			case '5':
+				init_pair(1, COLOR_BLACK, COLOR_WHITE);	
+				init_pair(2, COLOR_RED, COLOR_RED);
+				init_pair(3, COLOR_RED, COLOR_RED);
+				init_pair(4, COLOR_RED, COLOR_RED);
+				init_pair(5, COLOR_WHITE, COLOR_WHITE); 
+				BALL_WIDTH = 1;
+				BALL_HEIGHT = 1;
+				return;
+			case '6':
+				init_pair(1, COLOR_BLACK, COLOR_YELLOW);	
+				init_pair(2, COLOR_BLACK, COLOR_RED);
+				init_pair(3, COLOR_BLACK, COLOR_YELLOW);
+				init_pair(4, COLOR_BLACK, COLOR_MAGENTA);
+				init_pair(5, COLOR_BLACK, COLOR_BLACK); 
+				BALL_WIDTH = 4;
+				BALL_HEIGHT = 4;
 				return;
 		}
 	}
-	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 //Color for text
+	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 
 	init_pair(2, COLOR_CYAN, COLOR_BLACK);	 //Color for text
 	init_pair(3, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
 	init_pair(4, COLOR_RED, COLOR_BLACK); 	 //Color for ball
+	init_pair(5, COLOR_RED, COLOR_BLACK); 	 //Color for clearing screen
 }
 
 void print_intro(){
@@ -171,8 +207,8 @@ void init_stick(WIN *p_win)
 
 void init_ball(WIN *p_win)
 {
-	p_win->height = 2;
-	p_win->width = 2;
+	p_win->height = BALL_HEIGHT;
+	p_win->width = BALL_WIDTH;
 	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 2;
@@ -223,7 +259,7 @@ void init_game(PONG_GAME *game){
 
 void create_box(WIN *p_win, bool flag)
 {
-	int x,y,w,h;
+	double x,y,w,h;
 	x = p_win->startx;
 	y = p_win->starty;
 	w = p_win->width;
@@ -243,9 +279,7 @@ void create_box(WIN *p_win, bool flag)
 		mvvline(y + 1, x + w, p_win->border.rs, h - 1);
 		attroff(COLOR_PAIR(p_win->colorp));
 	}else{
-		attron(COLOR_PAIR(5));
 		clear_area(x,y,w,h);
-		attroff(COLOR_PAIR(5));
 	}
 	//Getch acts as a refresh, so we do not refresh here to prevent flickering
 }
@@ -317,8 +351,8 @@ void update_sticks(PONG_GAME *game,int ch){
 
 void stop_ball_vertical(PONG_GAME *game){
 	//Stops ball from going off screen (Vertical)
-	if(game->ball.starty > LINES-2){
-		game->ball.starty = LINES-2;
+	if(game->ball.starty > LINES-BALL_HEIGHT-2){
+		game->ball.starty = LINES-BALL_HEIGHT-2;
 		game->ball_velocity_y = -game->ball_velocity_y;
 	}
 	if(game->ball.starty < 1){
@@ -328,11 +362,13 @@ void stop_ball_vertical(PONG_GAME *game){
 }
 
 void stop_ball_horizontal(PONG_GAME *game){
-	if(game->ball.startx<-3){
+	if(game->ball.startx < -BALL_WIDTH-5){
 		game->rscore++;
+		usleep(200000);
 	}
-	else if(game->ball.startx>COLS+3){
+	else if(game->ball.startx > COLS+BALL_WIDTH+5){
 		game->lscore++;
+		usleep(200000);
 	}else{
 		return;
 	}
@@ -341,7 +377,7 @@ void stop_ball_horizontal(PONG_GAME *game){
 		return;
 	}		
 	create_box(&game->ball,FALSE); //undraw ball before moving
-	game->ball.startx = COLS/2 - game->ball.width/2;
+	game->ball.startx = COLS/2 - BALL_WIDTH/2;
 	srand(time(0));
 	game->ball.starty = LINES/2 + LINES*.2*pow(-1,rand());
 	game->ball_velocity_y = BALL_START_SPEED_Y * pow(-1,rand());
@@ -352,9 +388,9 @@ void stop_ball_horizontal(PONG_GAME *game){
 
 void bounce_ball_off_stick(PONG_GAME *game){
 	//Bounce ball off of sticks
-	if((fabs((game->lstick.startx+STICK_WIDTH-1)-game->ball.startx)<3 //Check if in the same x plane with lstick
+	if((fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+STICK_WIDTH-1 //Check if in the same x plane with lstick
 	&& game->lstick.starty<game->ball.starty && (game->lstick.starty+STICK_HEIGHT)>game->ball.starty) //Check if in the same y plane with rstick
-	|| (fabs((game->rstick.startx-1)-game->ball.startx )<3 //Same thing but as above but with rstick
+	|| (fabs(game->rstick.startx-game->ball.startx)<BALL_WIDTH+1 //Same thing but as above but with rstick
 	&& game->rstick.starty<game->ball.starty && (game->rstick.starty+STICK_HEIGHT)>game->ball.starty))
 	{
 		//See which half we are on, just to make sure we don't go the wrong way if we collide with the ball multiple times
