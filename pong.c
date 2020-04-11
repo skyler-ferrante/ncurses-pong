@@ -387,11 +387,12 @@ void stop_ball_horizontal(PONG_GAME *game){
 }
 
 void bounce_ball_off_stick(PONG_GAME *game){
-	//Bounce ball off of sticks
 	if((fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+STICK_WIDTH-1 //Check if in the same x plane with lstick
-	&& game->lstick.starty<game->ball.starty && (game->lstick.starty+STICK_HEIGHT)>game->ball.starty) //Check if in the same y plane with rstick
-	|| (fabs(game->rstick.startx-game->ball.startx)<BALL_WIDTH+1 //Same thing but as above but with rstick
-	&& game->rstick.starty<game->ball.starty && (game->rstick.starty+STICK_HEIGHT)>game->ball.starty))
+	&& ((game->lstick.starty <= game->ball.starty) || game->lstick.starty-BALL_HEIGHT+STICK_HEIGHT >= game->ball.starty))
+	//fabs(game->lstick.starty-game->ball.starty) < STICK_HEIGHT+BALL_HEIGHT) 
+	//Check if in the same y plane with rstick
+	|| (fabs(game->rstick.startx-game->ball.startx) < BALL_WIDTH+1 //Same thing but as above but with rstick
+	&& ((game->rstick.starty <= game->ball.starty) ||  game->rstick.starty-BALL_HEIGHT+STICK_HEIGHT >= game->ball.starty)))
 	{
 		//See which half we are on, just to make sure we don't go the wrong way if we collide with the ball multiple times
 		int temp = (game->ball.startx>COLS/2) ? 1 : -1;
