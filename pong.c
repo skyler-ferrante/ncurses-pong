@@ -4,17 +4,11 @@
 #include <math.h>
 #include <time.h>
 
-typedef struct _win_border_struct {
-	chtype 	ls, rs, ts, bs,
-	 	tl, tr, bl, br;
-}WIN_BORDER;
-
 typedef struct _WIN_struct {
 
 	double startx, starty;
 	int height, width;
 	int colorp;
-	WIN_BORDER border;
 }WIN;
 
 typedef struct pong_game_struct {
@@ -45,6 +39,10 @@ int BALL_WIDTH = 2; //May want to change that based on themes
 int BALL_HEIGHT = 2;
 const double BALL_START_SPEED_X = .5;
 const double BALL_START_SPEED_Y = .15;
+
+const chtype left_right_border_ch = '|';
+const chtype top_bottom_border_ch = '-';
+const chtype corners_ch = '+';
 
 int main(int argc, char **argv)
 {
@@ -183,18 +181,6 @@ void end_message(int lscore,int rscore,int bounces){
 	printf("%i bounces\n",bounces);
 }
 
-
-void init_border(WIN *p_win){
-	p_win->border.ls = '|';
-	p_win->border.rs = '|';
-	p_win->border.ts = '-';
-	p_win->border.bs = '-';
-	p_win->border.tl = '+';
-	p_win->border.tr = '+';
-	p_win->border.bl = '+';
-	p_win->border.br = '+';
-}
-
 void init_stick(WIN *p_win)
 {
 	p_win->height = STICK_HEIGHT;
@@ -202,7 +188,6 @@ void init_stick(WIN *p_win)
 	p_win->starty = (LINES - p_win->height)/2;	
 	p_win->startx = (COLS - p_win->width);
 	p_win->colorp = 3;
-	init_border(p_win);
 }
 
 void init_ball(WIN *p_win)
@@ -212,7 +197,6 @@ void init_ball(WIN *p_win)
 	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 2;
-	init_border(p_win);
 }
 
 void init_middle_line(WIN *p_win)
@@ -222,7 +206,6 @@ void init_middle_line(WIN *p_win)
 	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 4;
-	init_border(p_win);
 }
 
 void init_outer_line(WIN *p_win)
@@ -232,7 +215,6 @@ void init_outer_line(WIN *p_win)
 	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width)/2;
 	p_win->colorp = 4;
-	init_border(p_win);
 }
 
 void create_box(WIN *p_win, bool flag)
@@ -247,14 +229,14 @@ void create_box(WIN *p_win, bool flag)
 	if(flag == TRUE)
 	{	
 		attron(COLOR_PAIR(p_win->colorp));
-		mvaddch(y, x, p_win->border.tl);
-		mvaddch(y, x + w, p_win->border.tr);
-		mvaddch(y + h, x, p_win->border.bl);
-		mvaddch(y + h, x + w, p_win->border.br);
-		mvhline(y, x + 1, p_win->border.ts, w - 1);
-		mvhline(y + h, x + 1, p_win->border.bs, w - 1);
-		mvvline(y + 1, x, p_win->border.ls, h - 1);
-		mvvline(y + 1, x + w, p_win->border.rs, h - 1);
+		mvaddch(y, x, corners_ch);
+		mvaddch(y, x + w, corners_ch);
+		mvaddch(y + h, x, corners_ch);
+		mvaddch(y + h, x + w, corners_ch);
+		mvhline(y, x + 1, top_bottom_border_ch, w - 1);
+		mvhline(y + h, x + 1, top_bottom_border_ch, w - 1);
+		mvvline(y + 1, x, left_right_border_ch, h - 1);
+		mvvline(y + 1, x + w, left_right_border_ch, h - 1);
 		attroff(COLOR_PAIR(p_win->colorp));
 	}else{
 		clear_area(x,y,w,h);
