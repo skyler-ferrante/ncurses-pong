@@ -235,28 +235,6 @@ void init_outer_line(WIN *p_win)
 	init_border(p_win);
 }
 
-void init_game(PONG_GAME *game){
-	game->lscore = 0;
-	game->rscore = 0;
-	game->bounces = 0;
-	game->is_done = false;
-
-	init_stick(&game->lstick);
-	game->lstick.startx = game->lstick.startx*.125;
-
-	init_stick(&game->rstick);
-	game->rstick.startx = game->rstick.startx*.875;
-
-	init_ball(&game->ball);
-
-	init_middle_line(&game->middle_line);
-
-	init_outer_line(&game->outer_line);
-
-	game->ball_velocity_x = BALL_START_SPEED_X;
-	game->ball_velocity_y = BALL_START_SPEED_Y;
-}
-
 void create_box(WIN *p_win, bool flag)
 {
 	double x,y,w,h;
@@ -284,6 +262,32 @@ void create_box(WIN *p_win, bool flag)
 	//Getch acts as a refresh, so we do not refresh here to prevent flickering
 }
 
+
+void init_game(PONG_GAME *game){
+	game->lscore = 0;
+	game->rscore = 0;
+	game->bounces = 0;
+	game->is_done = false;
+
+	init_stick(&game->lstick);
+	game->lstick.startx = game->lstick.startx*.125;
+
+	init_stick(&game->rstick);
+	game->rstick.startx = game->rstick.startx*.875;
+
+	init_ball(&game->ball);
+
+	init_middle_line(&game->middle_line);
+
+	init_outer_line(&game->outer_line);
+
+	game->ball_velocity_x = BALL_START_SPEED_X;
+	game->ball_velocity_y = BALL_START_SPEED_Y;
+	
+	//Draws the full background once, instead of every frame 
+	create_box(&game->outer_line,FALSE);
+}
+
 void update_screen_sise(PONG_GAME *game){
 	game->middle_line.height = LINES;
 	game->outer_line.height = LINES;
@@ -308,7 +312,6 @@ void clear_shapes(PONG_GAME *game){
 	create_box(&game->lstick,FALSE); //Clears sticks from the screen
 	create_box(&game->rstick,FALSE);
 	create_box(&game->ball,FALSE);
-	create_box(&game->outer_line,FALSE);
 }
 
 void update_position(PONG_GAME *game,int ch){
