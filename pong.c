@@ -71,12 +71,24 @@ int main(int argc, char **argv)
 	end_message(game.lscore,game.rscore,game.bounces);
 	return 0;
 }
-void clear_area(int x,int y, int w, int h)
-{
-	attron(COLOR_PAIR(5));
+
+void fill_area(int x, int y, int w, int h){
 	for(int j = y; j <= y + h; ++j)
 		for(int i = x; i <= x + w; ++i)
 			mvaddch(j, i, ' ');
+}
+
+void fill_win(WIN *p_win)
+{
+	attron(COLOR_PAIR(p_win->colorp));
+	fill_area(p_win->startx+1,p_win->starty+1,p_win->width-2,p_win->height-2);
+	attroff(COLOR_PAIR(p_win->colorp));
+}
+
+void clear_area(int x,int y, int w, int h)
+{
+	attron(COLOR_PAIR(5));
+	fill_area(x,y,w,h);
 	attroff(COLOR_PAIR(5));
 }
 
@@ -288,6 +300,7 @@ void draw_screen(PONG_GAME *game){
 	create_box(&game->lstick,TRUE); //Draws sticks
 	create_box(&game->rstick,TRUE);
 	create_box(&game->ball,TRUE); //Draws ball
+	fill_win(&game->ball);
 }
 
 void clear_shapes(PONG_GAME *game){
