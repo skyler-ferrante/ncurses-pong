@@ -5,7 +5,6 @@
 #include <time.h>
 
 typedef struct _WIN_struct {
-
 	double startx, starty;
 	int height, width;
 	int colorp;
@@ -35,7 +34,7 @@ void end_message(int lscore,int rscore,int bounces);
 
 const int STICK_HEIGHT = 12;
 const int STICK_WIDTH = 1;
-int BALL_WIDTH = 2; //May want to change that based on themes
+int BALL_WIDTH = 3; //May want to change that based on themes
 int BALL_HEIGHT = 2;
 const double BALL_START_SPEED_X = .5;
 const double BALL_START_SPEED_Y = .15;
@@ -50,7 +49,6 @@ int main(int argc, char **argv)
 	print_intro();
 
 	PONG_GAME game;
-	
 	init_game(&game);
 
 	int ch; //For user input in while loop
@@ -112,18 +110,19 @@ void init_ncurses(int argc,char *argv[]){
 	while((c = getopt(argc,argv,"123456")) != -1){
 		switch(c){
 			case '2':
-				init_pair(1, COLOR_CYAN, COLOR_BLACK);	 
+				init_pair(1, COLOR_CYAN, COLOR_BLACK);
 				init_pair(2, COLOR_CYAN, COLOR_BLACK);
 				init_pair(3, COLOR_BLUE, COLOR_BLACK);
 				init_pair(4, COLOR_RED, COLOR_BLACK);
 				init_pair(5, COLOR_RED, COLOR_BLACK);
+				BALL_WIDTH = 3;
 				return;
 			case '3':
-				init_pair(1, COLOR_WHITE, COLOR_GREEN);	 
-				init_pair(2, COLOR_WHITE, COLOR_WHITE);	 
-				init_pair(3, COLOR_WHITE, COLOR_WHITE);	
-				init_pair(4, COLOR_WHITE, COLOR_WHITE);  
-				init_pair(5, COLOR_WHITE, COLOR_GREEN);  
+				init_pair(1, COLOR_WHITE, COLOR_GREEN);
+				init_pair(2, COLOR_WHITE, COLOR_WHITE);
+				init_pair(3, COLOR_WHITE, COLOR_WHITE);
+				init_pair(4, COLOR_WHITE, COLOR_WHITE);
+				init_pair(5, COLOR_WHITE, COLOR_GREEN);
 				BALL_WIDTH = 1;
 				BALL_HEIGHT = 1;
 				return;
@@ -145,7 +144,7 @@ void init_ncurses(int argc,char *argv[]){
 				BALL_HEIGHT = 1;
 				return;
 			case '6':
-				init_pair(1, COLOR_BLACK, COLOR_YELLOW);	
+				init_pair(1, COLOR_BLACK, COLOR_YELLOW);
 				init_pair(2, COLOR_BLACK, COLOR_RED);
 				init_pair(3, COLOR_BLACK, COLOR_YELLOW);
 				init_pair(4, COLOR_BLACK, COLOR_MAGENTA);
@@ -155,7 +154,7 @@ void init_ncurses(int argc,char *argv[]){
 				return;
 		}
 	}
-	init_pair(1, COLOR_WHITE, COLOR_BLUE);	
+	init_pair(1, COLOR_WHITE, COLOR_BLUE);
 	init_pair(2, COLOR_WHITE, COLOR_WHITE);
 	init_pair(3, COLOR_WHITE, COLOR_WHITE);
 	init_pair(4, COLOR_WHITE, COLOR_WHITE);
@@ -181,7 +180,7 @@ void print_intro(){
 
 	getch();
 	clear();
-	nodelay(stdscr,TRUE); //I wanted to put this in init_ncurses but then we could not pause during this function	
+	nodelay(stdscr,TRUE); //I wanted to put this in init_ncurses but then we could not pause during this function
 }
 
 void end_message(int lscore,int rscore,int bounces){
@@ -201,7 +200,7 @@ void init_stick(WIN *p_win)
 {
 	p_win->height = STICK_HEIGHT;
 	p_win->width = STICK_WIDTH;
-	p_win->starty = (LINES - p_win->height)/2;	
+	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width);
 	p_win->colorp = 3;
 }
@@ -281,7 +280,7 @@ void init_game(PONG_GAME *game){
 
 	game->ball_velocity_x = BALL_START_SPEED_X;
 	game->ball_velocity_y = BALL_START_SPEED_Y;
-	
+
 	//Draws the full background once, instead of every frame 
 	create_box(&game->outer_line,FALSE);
 }
@@ -391,7 +390,7 @@ void stop_ball_horizontal(PONG_GAME *game){
 void bounce_ball_off_stick(PONG_GAME *game){
 	if((fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+STICK_WIDTH-1 //Check if in the same x plane with lstick
 	&& ((game->lstick.starty >= game->ball.starty-STICK_HEIGHT-BALL_HEIGHT) && (game->lstick.starty <= game->ball.starty)))
-	//fabs(game->lstick.starty-game->ball.starty) < STICK_HEIGHT+BALL_HEIGHT) 
+	//fabs(game->lstick.starty-game->ball.starty) < STICK_HEIGHT+BALL_HEIGHT)
 	//Check if in the same y plane with rstick
 	|| (fabs(game->rstick.startx-game->ball.startx) < BALL_WIDTH+1 //Same thing but as above but with rstick
 	&& ((game->rstick.starty >= game->ball.starty-STICK_HEIGHT-BALL_HEIGHT) && (game->rstick.starty <= game->ball.starty))))
