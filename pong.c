@@ -351,8 +351,8 @@ void update_sticks(PONG_GAME *game,int ch){
 
 void stop_ball_vertical(PONG_GAME *game){
 	//Stops ball from going off screen (Vertical)
-	if(game->ball.starty > LINES-BALL_HEIGHT-2){
-		game->ball.starty = LINES-BALL_HEIGHT-2;
+	if(game->ball.starty > LINES-BALL_HEIGHT-1){
+		game->ball.starty = LINES-BALL_HEIGHT-1;
 		game->ball_velocity_y = -game->ball_velocity_y;
 	}
 	if(game->ball.starty < 1){
@@ -387,11 +387,6 @@ void stop_ball_horizontal(PONG_GAME *game){
 }
 
 void bounce_ball_off_stick(PONG_GAME *game){
-	mvprintw(4,3,(game->lstick.starty <= game->ball.starty) ? "Debug true":"Debug false" );
-	mvprintw(5,3,(game->lstick.starty >= game->ball.starty-STICK_HEIGHT-BALL_HEIGHT) ? "Debug true":"Debug false" );
-	mvprintw(6,3,"Debug %f",game->ball.starty+STICK_HEIGHT);
-	mvprintw(7,3,"Debug %f",game->lstick.starty);
-
 	if((fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+STICK_WIDTH-1 //Check if in the same x plane with lstick
 	&& ((game->lstick.starty >= game->ball.starty-STICK_HEIGHT-BALL_HEIGHT) && (game->lstick.starty <= game->ball.starty)))
 	//fabs(game->lstick.starty-game->ball.starty) < STICK_HEIGHT+BALL_HEIGHT) 
