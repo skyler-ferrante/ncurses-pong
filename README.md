@@ -15,8 +15,16 @@ To use
 
     $ ./pong
 
-To use another color set
+To use another color set (6 in total)
 
     $ ./pong -2 
 
     $ ./pong -3
+
+Screenshots:
+
+![Image1](images/image1.png)
+
+![Image1](images/image3.png)
+
+![Image1](images/image2.png)
