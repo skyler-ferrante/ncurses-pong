@@ -108,11 +108,11 @@ void init_ncurses(int argc,char *argv[]){
 	while((c = getopt(argc,argv,"123456")) != -1){
 		switch(c){
 			case '2':
-				init_pair(1, COLOR_WHITE, COLOR_BLUE);	
-				init_pair(2, COLOR_WHITE, COLOR_WHITE);
-				init_pair(3, COLOR_WHITE, COLOR_WHITE);
-				init_pair(4, COLOR_WHITE, COLOR_WHITE);
-				init_pair(5, COLOR_WHITE, COLOR_BLUE); 
+				init_pair(1, COLOR_CYAN, COLOR_BLACK);	 
+				init_pair(2, COLOR_CYAN, COLOR_BLACK);
+				init_pair(3, COLOR_BLUE, COLOR_BLACK);
+				init_pair(4, COLOR_RED, COLOR_BLACK);
+				init_pair(5, COLOR_RED, COLOR_BLACK);
 				return;
 			case '3':
 				init_pair(1, COLOR_WHITE, COLOR_GREEN);	 
@@ -151,11 +151,11 @@ void init_ncurses(int argc,char *argv[]){
 				return;
 		}
 	}
-	init_pair(1, COLOR_CYAN, COLOR_BLACK);	 
-	init_pair(2, COLOR_CYAN, COLOR_BLACK);	 //Color for text
-	init_pair(3, COLOR_BLUE, COLOR_BLACK);	 //Color for sticks
-	init_pair(4, COLOR_RED, COLOR_BLACK); 	 //Color for ball
-	init_pair(5, COLOR_RED, COLOR_BLACK); 	 //Color for clearing screen
+	init_pair(1, COLOR_WHITE, COLOR_BLUE);	
+	init_pair(2, COLOR_WHITE, COLOR_WHITE);
+	init_pair(3, COLOR_WHITE, COLOR_WHITE);
+	init_pair(4, COLOR_WHITE, COLOR_WHITE);
+	init_pair(5, COLOR_WHITE, COLOR_BLUE);
 }
 
 void print_intro(){
