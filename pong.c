@@ -63,7 +63,11 @@ int main(int argc, char **argv)
 			draw_screen(&game);
 			usleep(6000);
 		}else{
-			while((ch = getch()) != (int)'p'){}
+			while((ch = getch()) != (int)'p' && !game.is_done){
+				if(ch == 27){
+					game.is_done = true;
+				}
+			}
 		}
 	}
 	clear();
