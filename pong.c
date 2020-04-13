@@ -23,7 +23,8 @@ typedef struct pong_game_struct {
 	WIN outer_line;
 }PONG_GAME;
 
-void init_ncurses(int argc, char **argv);
+void init_ncurses();
+void get_arguments();
 void print_intro();
 void init_game(PONG_GAME *game);
 void draw_screen(PONG_GAME *game);
@@ -45,7 +46,8 @@ const chtype corners_ch = '+';
 
 int main(int argc, char **argv)
 {
-	init_ncurses(argc,argv);
+	init_ncurses();
+	get_arguments(argc,argv);
 	print_intro();
 
 	PONG_GAME game;
@@ -94,20 +96,14 @@ void clear_area(int x,int y, int w, int h)
 	attroff(COLOR_PAIR(5));
 }
 
-void init_ncurses(int argc,char *argv[]){
-	initscr();
-	start_color();
-	cbreak();
-	keypad(stdscr, TRUE);
-	noecho();
-	curs_set(0);
-	int c;
+void get_arguments(int argc,char *argv[]){
 	//Color pair 1 is text
 	//Color pair 2 is ball
 	//Color pair 3 sticks
 	//Color pair 4 middle and outer lines
 	//Color pair 5 is for clearing screen 
-	while((c = getopt(argc,argv,"123456")) != -1){
+	int c;
+	while((c = getopt(argc,argv,"c:123456")) != -1){
 		switch(c){
 			case '2':
 				init_pair(1, COLOR_CYAN, COLOR_BLACK);
@@ -159,6 +155,15 @@ void init_ncurses(int argc,char *argv[]){
 	init_pair(3, COLOR_WHITE, COLOR_WHITE);
 	init_pair(4, COLOR_WHITE, COLOR_WHITE);
 	init_pair(5, COLOR_WHITE, COLOR_BLUE);
+}
+
+void init_ncurses(){
+	initscr();
+	start_color();
+	cbreak();
+	keypad(stdscr, TRUE);
+	noecho();
+	curs_set(0);
 }
 
 void print_intro(){
@@ -303,7 +308,7 @@ void draw_screen(PONG_GAME *game){
 	create_box(&game->lstick,TRUE); //Draws sticks
 	create_box(&game->rstick,TRUE);
 	create_box(&game->ball,TRUE); //Draws ball
-	fill_win(&game->ball);
+	fill_win(&game->ball); //Fills in center of ball
 }
 
 void clear_shapes(PONG_GAME *game){
@@ -389,9 +394,7 @@ void stop_ball_horizontal(PONG_GAME *game){
 
 void bounce_ball_off_stick(PONG_GAME *game){
 	if((fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+STICK_WIDTH-1 //Check if in the same x plane with lstick
-	&& ((game->lstick.starty >= game->ball.starty-STICK_HEIGHT-BALL_HEIGHT) && (game->lstick.starty <= game->ball.starty)))
-	//fabs(game->lstick.starty-game->ball.starty) < STICK_HEIGHT+BALL_HEIGHT)
-	//Check if in the same y plane with rstick
+	&& ((game->lstick.starty >= game->ball.starty-STICK_HEIGHT-BALL_HEIGHT) && (game->lstick.starty <= game->ball.starty))) //Check if in the same y plane with rstick
 	|| (fabs(game->rstick.startx-game->ball.startx) < BALL_WIDTH+1 //Same thing but as above but with rstick
 	&& ((game->rstick.starty >= game->ball.starty-STICK_HEIGHT-BALL_HEIGHT) && (game->rstick.starty <= game->ball.starty))))
 	{
