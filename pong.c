@@ -27,8 +27,8 @@ void init_ncurses();
 void get_arguments();
 void print_intro();
 void init_game(PONG_GAME *game);
+void create_box(WIN *p_win,bool FLAG);
 void draw_screen(PONG_GAME *game);
-void clear_shapes(PONG_GAME *game);
 void update_sticks(PONG_GAME *game,int ch);
 void update_ball(PONG_GAME *game);
 void end_message(int lscore,int rscore,int bounces);
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 	while((ch = getch()) != 27 && !game.is_done)
 	{
 		if(ch != (int)'p'){
-			clear_shapes(&game);
+			create_box(&game.ball,FALSE); //Ball is the only thing cleared and drawn every frame
 			update_sticks(&game,ch);
 			update_ball(&game);
 			draw_screen(&game);
@@ -321,14 +321,6 @@ void draw_screen(PONG_GAME *game){
 	fill_win(&game->ball); //Fills in center of ball
 }
 
-void clear_shapes(PONG_GAME *game){
-	//create_box(&game->lstick,FALSE); //Clears sticks from the screen
-	if(!PRACTICE_MODE){
-		//create_box(&game->rstick,FALSE);
-	}
-	create_box(&game->ball,FALSE);
-}
-
 void update_sticks_position(PONG_GAME *game,int ch){
 	switch(ch){ //Updates sticks position
 		case (int)'w': //W
@@ -372,9 +364,9 @@ void stop_sticks_from_going_off_screen(PONG_GAME *game){
 		game->lstick.starty = LINES-LEFT_STICK_HEIGHT-2;
 		create_box(&game->lstick,TRUE);
 	}
-	else if(game->lstick.starty < 2){
+	else if(game->lstick.starty < 1){
 		create_box(&game->lstick,FALSE);
-		game->lstick.starty = 2;
+		game->lstick.starty = 1;
 		create_box(&game->lstick,TRUE);
 	}
 
@@ -383,9 +375,9 @@ void stop_sticks_from_going_off_screen(PONG_GAME *game){
 		game->rstick.starty = LINES-RIGHT_STICK_HEIGHT-2;
 		create_box(&game->rstick,TRUE);
 	}
-	else if(game->rstick.starty < 3){
+	else if(game->rstick.starty < 1){
 		create_box(&game->rstick,FALSE);
-		game->rstick.starty = 3;
+		game->rstick.starty = 1;
 		create_box(&game->rstick,TRUE);
 	}
 }
