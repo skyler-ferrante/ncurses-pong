@@ -329,7 +329,7 @@ void clear_shapes(PONG_GAME *game){
 	create_box(&game->ball,FALSE);
 }
 
-void update_position(PONG_GAME *game,int ch){
+void update_sticks_position(PONG_GAME *game,int ch){
 	switch(ch){ //Updates sticks position
 		case (int)'w': //W
 			game->lstick.starty-=3; //Moves left stick up
@@ -371,7 +371,7 @@ void stop_sticks_from_going_off_screen(PONG_GAME *game){
 }
 
 void update_sticks(PONG_GAME *game,int ch){
-	update_position(game,ch);
+	update_sticks_position(game,ch);
 	stop_sticks_from_going_off_screen(game);
 }
 
@@ -427,6 +427,15 @@ void bounce_ball_off_stick(PONG_GAME *game){
 			game->ball_velocity_y = ( (game->ball_velocity_y>0) - (game->ball_velocity_y<0) ) ? -BALL_START_SPEED_Y : BALL_START_SPEED_Y;
 		}
 		game->bounces++;
+		if(game->ball.startx<game->lstick.startx){ 
+			create_box(&game->ball,FALSE);
+			refresh();
+			game->ball.startx = game->lstick.startx+LEFT_STICK_WIDTH+2;
+		}else if(game->ball.startx>game->rstick.startx){
+			create_box(&game->ball,TRUE);
+			refresh();
+			game->ball.startx = game->rstick.startx+RIGHT_STICK_WIDTH+2;
+		}
 	}		
 }
 
