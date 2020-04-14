@@ -298,6 +298,8 @@ void init_game(PONG_GAME *game){
 
 	//Draws the full background once, instead of every frame 
 	create_box(&game->outer_line,FALSE);
+	create_box(&game->lstick,TRUE);
+	create_box(&game->rstick,TRUE);
 }
 
 void update_screen_sise(PONG_GAME *game){
@@ -315,16 +317,14 @@ void draw_screen(PONG_GAME *game){
 
 	create_box(&game->middle_line,TRUE); //Draws middle line
 	create_box(&game->outer_line,TRUE);
-	create_box(&game->lstick,TRUE); //Draws sticks
-	create_box(&game->rstick,TRUE);
 	create_box(&game->ball,TRUE); //Draws ball
 	fill_win(&game->ball); //Fills in center of ball
 }
 
 void clear_shapes(PONG_GAME *game){
-	create_box(&game->lstick,FALSE); //Clears sticks from the screen
+	//create_box(&game->lstick,FALSE); //Clears sticks from the screen
 	if(!PRACTICE_MODE){
-		create_box(&game->rstick,FALSE);
+		//create_box(&game->rstick,FALSE);
 	}
 	create_box(&game->ball,FALSE);
 }
@@ -332,23 +332,35 @@ void clear_shapes(PONG_GAME *game){
 void update_sticks_position(PONG_GAME *game,int ch){
 	switch(ch){ //Updates sticks position
 		case (int)'w': //W
-			game->lstick.starty-=3; //Moves left stick up
+			create_box(&game->lstick,FALSE); //Draws sticks
+			game->lstick.starty-=3; //Moves left stick up	
+			create_box(&game->lstick,TRUE); //Draws sticks
 			break;
 		case (int)'s': //S
+			create_box(&game->lstick,FALSE); //Draws sticks
 			game->lstick.starty+=3;
+			create_box(&game->lstick,TRUE); //Draws sticks
 			break;
 		case KEY_UP: //Arrow key up
 			if(!PRACTICE_MODE){
+				create_box(&game->rstick,FALSE); //Draws sticks
 				game->rstick.starty-=3; //Moves right stick up
+				create_box(&game->rstick,TRUE); //Draws sticks
 			}else{
-				game->lstick.starty-=3; //Moves right stick up
+				create_box(&game->lstick,FALSE); //Draws sticks
+				game->lstick.starty-=3; //Moves left stick up	
+				create_box(&game->lstick,TRUE); //Draws sticks
 			}
 			break;
 		case KEY_DOWN: //Arrow key down
 			if(!PRACTICE_MODE){
-				game->rstick.starty+=3;
+				create_box(&game->rstick,FALSE); //Draws sticks
+				game->rstick.starty+=3; //Moves right stick up
+				create_box(&game->rstick,TRUE); //Draws sticks
 			}else{
-				game->lstick.starty+=3;
+				create_box(&game->lstick,FALSE); //Draws sticks
+				game->lstick.starty+=3; //Moves left stick up	
+				create_box(&game->lstick,TRUE); //Draws sticks
 			}
 			break;
 	}
@@ -356,17 +368,25 @@ void update_sticks_position(PONG_GAME *game,int ch){
 
 void stop_sticks_from_going_off_screen(PONG_GAME *game){
 	if(game->lstick.starty > LINES-LEFT_STICK_HEIGHT-2){
+		create_box(&game->lstick,FALSE);
 		game->lstick.starty = LINES-LEFT_STICK_HEIGHT-2;
+		create_box(&game->lstick,TRUE);
 	}
-	else if(game->lstick.starty < 1){
-		game->lstick.starty = 1;
+	else if(game->lstick.starty < 2){
+		create_box(&game->lstick,FALSE);
+		game->lstick.starty = 2;
+		create_box(&game->lstick,TRUE);
 	}
 
 	if(game->rstick.starty > LINES-RIGHT_STICK_HEIGHT-2){
+		create_box(&game->rstick,FALSE);
 		game->rstick.starty = LINES-RIGHT_STICK_HEIGHT-2;
+		create_box(&game->rstick,TRUE);
 	}
-	else if(game->rstick.starty < 1){
-		game->rstick.starty = 1;
+	else if(game->rstick.starty < 3){
+		create_box(&game->rstick,FALSE);
+		game->rstick.starty = 3;
+		create_box(&game->rstick,TRUE);
 	}
 }
 
@@ -415,28 +435,30 @@ void stop_ball_horizontal(PONG_GAME *game){
 void bounce_ball_off_stick(PONG_GAME *game){
 	if((fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+LEFT_STICK_WIDTH-1 //Check if in the same x plane with lstick
 	&& ((game->lstick.starty >= game->ball.starty-LEFT_STICK_HEIGHT-BALL_HEIGHT) && (game->lstick.starty <= game->ball.starty))) //Check if in the same y plane with rstick
-	|| (fabs(game->rstick.startx-game->ball.startx) < BALL_WIDTH+1 //Same thing but as above but with rstick
+	|| (fabs(game->rstick.startx-game->ball.startx) < BALL_WIDTH+2 //Same thing but as above but with rstick
 	&& ((game->rstick.starty >= game->ball.starty-RIGHT_STICK_HEIGHT-BALL_HEIGHT) && (game->rstick.starty <= game->ball.starty))))
 	{
-		//See which half we are on, just to make sure we don't go the wrong way if we collide with the ball multiple times
-		int temp = (game->ball.startx>COLS/2) ? 1 : -1;
-		game->ball_velocity_x = temp * fabs(game->ball_velocity_x); 
-		game->ball_velocity_y *= 1.1;
 		if( fabs(game->ball_velocity_y) > BALL_START_SPEED_Y*3 ){ //Make sure we Don't go faster than 3 * Start speed in the y direction
  			//Set gameball_velocity_y to BALL_START_SPEED_Y, but the same direction/sign
 			game->ball_velocity_y = ( (game->ball_velocity_y>0) - (game->ball_velocity_y<0) ) ? -BALL_START_SPEED_Y : BALL_START_SPEED_Y;
 		}
-		game->bounces++;
-		if(game->ball.startx<game->lstick.startx){ 
-			create_box(&game->ball,FALSE);
+		if(game->ball.startx < game->lstick.startx){ 
+			create_box(&game->ball,FALSE); //Make sure we don't get artifacts off the ball
 			refresh();
 			game->ball.startx = game->lstick.startx+LEFT_STICK_WIDTH+2;
-		}else if(game->ball.startx>game->rstick.startx){
+		}else if(game->ball.startx > game->rstick.startx){
 			create_box(&game->ball,FALSE);
 			refresh();
 			game->ball.startx = game->rstick.startx-RIGHT_STICK_WIDTH-2;
 		}
-	}		
+		//See which half we are on, just to make sure we don't go the wrong way
+		bool on_right = (game->ball.startx>COLS/2);
+		int temp = (on_right) ? 1 : -1;
+		game->ball_velocity_x = temp * fabs(game->ball_velocity_x);
+		game->ball_velocity_y *= 1.1;
+		game->bounces++;
+		(on_right) ? create_box(&game->rstick,TRUE) : create_box(&game->lstick,TRUE);
+	}
 }
 
 void update_ball(PONG_GAME *game){
