@@ -432,9 +432,9 @@ void bounce_ball_off_stick(PONG_GAME *game){
 			refresh();
 			game->ball.startx = game->lstick.startx+LEFT_STICK_WIDTH+2;
 		}else if(game->ball.startx>game->rstick.startx){
-			create_box(&game->ball,TRUE);
+			create_box(&game->ball,FALSE);
 			refresh();
-			game->ball.startx = game->rstick.startx+RIGHT_STICK_WIDTH+2;
+			game->ball.startx = game->rstick.startx-RIGHT_STICK_WIDTH-2;
 		}
 	}		
 }
