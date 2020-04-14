@@ -119,7 +119,7 @@ void get_arguments(int argc,char *argv[]){
 				init_pair(3, COLOR_BLUE, COLOR_BLACK);
 				init_pair(4, COLOR_RED, COLOR_BLACK);
 				init_pair(5, COLOR_RED, COLOR_BLACK);
-				BALL_WIDTH = 3;
+				BALL_HEIGHT = 2;
 				return;
 			case '3':
 				init_pair(1, COLOR_WHITE, COLOR_GREEN);
@@ -127,8 +127,6 @@ void get_arguments(int argc,char *argv[]){
 				init_pair(3, COLOR_WHITE, COLOR_WHITE);
 				init_pair(4, COLOR_WHITE, COLOR_WHITE);
 				init_pair(5, COLOR_WHITE, COLOR_GREEN);
-				BALL_WIDTH = 1;
-				BALL_HEIGHT = 1;
 				return;
 			case '4':
 				init_pair(1, COLOR_WHITE, COLOR_BLACK);	
@@ -136,7 +134,6 @@ void get_arguments(int argc,char *argv[]){
 				init_pair(3, COLOR_WHITE, COLOR_WHITE);
 				init_pair(4, COLOR_WHITE, COLOR_WHITE);
 				init_pair(5, COLOR_WHITE, COLOR_BLACK);
-				BALL_WIDTH = 3;
 				return;
 			case '5':
 				init_pair(1, COLOR_BLACK, COLOR_WHITE);	
@@ -144,10 +141,10 @@ void get_arguments(int argc,char *argv[]){
 				init_pair(3, COLOR_RED, COLOR_RED);
 				init_pair(4, COLOR_RED, COLOR_RED);
 				init_pair(5, COLOR_WHITE, COLOR_WHITE); 
-				BALL_WIDTH = 1;
+				BALL_WIDTH = 2;
 				BALL_HEIGHT = 1;
 				return;
-			case '6':
+			case '6': //More for testing edge cases than anything
 				init_pair(1, COLOR_BLACK, COLOR_YELLOW);
 				init_pair(2, COLOR_BLACK, COLOR_RED);
 				init_pair(3, COLOR_BLACK, COLOR_YELLOW);
