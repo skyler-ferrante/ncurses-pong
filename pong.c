@@ -33,8 +33,8 @@ void update_sticks(PONG_GAME *game,int ch);
 void update_ball(PONG_GAME *game);
 void end_message(int lscore,int rscore,int bounces);
 
-int LEFT_STICK_HEIGHT = 12; //May want to change that based on arguments
-int RIGHT_STICK_HEIGHT = 12; //May want to change that based on arguments
+int LEFT_STICK_HEIGHT = 12; //May want to change these based on arguments
+int RIGHT_STICK_HEIGHT = 12;
 int LEFT_STICK_WIDTH = 1;
 int RIGHT_STICK_WIDTH = 1;
 int BALL_WIDTH = 3;
@@ -257,7 +257,7 @@ void create_box(WIN *p_win, bool flag)
 
 	//If flag is true, print p_win, else clear p_win
 	if(flag == TRUE)
-	{	
+	{
 		attron(COLOR_PAIR(p_win->colorp));
 		mvaddch(y, x, corners_ch);
 		mvaddch(y, x + w, corners_ch);
@@ -273,7 +273,6 @@ void create_box(WIN *p_win, bool flag)
 	}
 	//Getch acts as a refresh, so we do not refresh here to prevent flickering
 }
-
 
 void init_game(PONG_GAME *game){
 	game->lscore = 0;
