@@ -73,7 +73,6 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	endwin();
 	printf("ESC was pressed\n");
 	end_message(game.lscore,game.rscore,game.bounces);
 	return 0;
@@ -198,7 +197,10 @@ void print_intro(){
 
 void end_message(int lscore,int rscore,int bounces){
 	endwin();
-	if(lscore==rscore){
+	if(PRACTICE_MODE){
+		printf("Practice mode\n");
+	}
+	else if(lscore==rscore){
 		printf("Tie game\n");
 	}else if(lscore>rscore){
 		printf("Left player wins\n");
