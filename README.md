@@ -15,11 +15,17 @@ To use
 
     $ ./pong
 
-To use another color set (6 in total)
+To use another color set (6 in total) give -number
 
     $ ./pong -2 
 
     $ ./pong -3
+
+To use practice mode (one player mode) give -p (before number)
+
+    $ ./pong -p
+
+    $ ./pong -p2
 
 Screenshots:
 
