@@ -37,7 +37,8 @@ int LEFT_STICK_HEIGHT = 12; //May want to change that based on arguments
 int RIGHT_STICK_HEIGHT = 12; //May want to change that based on arguments
 int LEFT_STICK_WIDTH = 1;
 int RIGHT_STICK_WIDTH = 1;
-int BALL_WIDTH = 3;int BALL_HEIGHT = 2;
+int BALL_WIDTH = 3;
+int BALL_HEIGHT = 1;
 const double BALL_START_SPEED_X = .5;
 const double BALL_START_SPEED_Y = .15;
 bool PRACTICE_MODE = false;
@@ -104,6 +105,7 @@ void get_arguments(int argc,char *argv[]){
 	//Color pair 3 sticks
 	//Color pair 4 middle and outer lines
 	//Color pair 5 is for clearing screen 
+	//-p makes right stick take the entire screen and redirects inputs from key up/down to left player
 	int c;
 	while((c = getopt(argc,argv,"p123456")) != -1){
 		switch(c){
