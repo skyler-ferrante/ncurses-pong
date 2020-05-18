@@ -39,6 +39,7 @@ int LEFT_STICK_WIDTH = 1;
 int RIGHT_STICK_WIDTH = 1;
 int BALL_WIDTH = 3;
 int BALL_HEIGHT = 1;
+const int MAX_BOUNCE_ANGLE = 75;
 const double BALL_START_SPEED_X = .5;
 const double BALL_START_SPEED_Y = .15;
 bool PRACTICE_MODE = false;
@@ -64,7 +65,7 @@ int main(int argc, char **argv)
 			update_sticks(&game,ch);
 			update_ball(&game);
 			draw_screen(&game);
-			usleep(6000);
+			usleep(7000);
 		}else{
 			while((ch = getch()) != (int)'p' && !game.is_done){
 				if(ch == 27){
@@ -425,15 +426,45 @@ void stop_ball_horizontal(PONG_GAME *game){
 
 bool checkIfBallTouchingLeftStick(PONG_GAME *game){
 	return fabs(game->lstick.startx - game->ball.startx) < BALL_WIDTH + LEFT_STICK_WIDTH - 1 //Check if in the same x plane with ball
-	&&     fabs(game->lstick.starty - game->ball.starty) <= BALL_HEIGHT + LEFT_STICK_HEIGHT; //Check if in the same y plane with ball
+	&&     fabs( (game->lstick.starty+(LEFT_STICK_HEIGHT/2)) - game->ball.starty)-BALL_HEIGHT
+		< LEFT_STICK_HEIGHT/2;
 }
 
 bool checkIfBallTouchingRightStick(PONG_GAME *game){
-	return fabs(game->rstick.startx - game->ball.startx) < BALL_WIDTH + 2 //Check if in the same x plane with ball
-	&&     fabs(game->rstick.starty - game->ball.starty) <= BALL_HEIGHT + RIGHT_STICK_HEIGHT; //Check if in the same y plane with ball
+	return fabs(game->rstick.startx - game->ball.startx) < BALL_WIDTH + RIGHT_STICK_WIDTH + 2 //Check if in the same x plane with ball
+	&&     fabs( (game->rstick.starty+(RIGHT_STICK_HEIGHT/2)) - game->ball.starty)-BALL_HEIGHT
+		< RIGHT_STICK_HEIGHT/2;
 }
 
+void bounce_helper(PONG_GAME *game,bool onright){
+		int temp = (onright) ? -1 : 1;
+		create_box(&game->ball,FALSE); //Make sure we don't get artifacts off the ball
+		
+		game->ball.startx += temp;
+		game->ball_velocity_x = -BALL_START_SPEED_X*temp;
+
+		(onright) ? create_box(&game->rstick,TRUE) : create_box(&game->lstick,TRUE);
+		game->bounces++;
+		refresh();
+}
+
+double find_multiplier(double stick_starty,double ball_starty,int stick_height){
+		double relativeIntersectY = (stick_starty+(stick_height/2)) - ball_starty;
+		double normalized = relativeIntersectY/(stick_height/2);
+		return normalized;
+}	
+
 void bounce_ball_off_stick(PONG_GAME *game){
+	if(checkIfBallTouchingLeftStick(game)){
+		game->ball_velocity_y = find_multiplier(game->lstick.starty,game->ball.starty,LEFT_STICK_HEIGHT)*.2;
+		bounce_helper(game,false);
+	}else if(checkIfBallTouchingRightStick(game)){
+		game->ball_velocity_y = find_multiplier(game->rstick.starty,game->ball.starty,RIGHT_STICK_HEIGHT)*.2;
+		bounce_helper(game,true);
+	}
+}
+
+void bounce_ball_off_stickDiff(PONG_GAME *game){
 	if(
 	checkIfBallTouchingLeftStick(game)
 	||
@@ -444,13 +475,7 @@ void bounce_ball_off_stick(PONG_GAME *game){
 			game->ball_velocity_y = ( game->ball_velocity_y < 0 ) ? -BALL_START_SPEED_Y : BALL_START_SPEED_Y;
 		}
 		if(game->ball.startx < game->lstick.startx){ 
-			create_box(&game->ball,FALSE); //Make sure we don't get artifacts off the ball
-			refresh();
-			game->ball.startx = game->lstick.startx+LEFT_STICK_WIDTH+2;
 		}else if(game->ball.startx > game->rstick.startx){
-			create_box(&game->ball,FALSE);
-			refresh();
-			game->ball.startx = game->rstick.startx-RIGHT_STICK_WIDTH-2;
 		}
 		//See which half we are on, just to make sure we don't go the wrong way
 		bool on_right = (game->ball.startx>COLS/2);
@@ -458,7 +483,6 @@ void bounce_ball_off_stick(PONG_GAME *game){
 		game->ball_velocity_x = temp * fabs(game->ball_velocity_x);
 		game->ball_velocity_y *= 1.1;
 		game->bounces++;
-		(on_right) ? create_box(&game->rstick,TRUE) : create_box(&game->lstick,TRUE);
 	}
 }
 
