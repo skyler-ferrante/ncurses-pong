@@ -424,10 +424,15 @@ void stop_ball_horizontal(PONG_GAME *game){
 }
 
 void bounce_ball_off_stick(PONG_GAME *game){
-	if((fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+LEFT_STICK_WIDTH-1 //Check if in the same x plane with lstick
-	&& ((game->lstick.starty >= game->ball.starty-LEFT_STICK_HEIGHT-BALL_HEIGHT) && (game->lstick.starty <= game->ball.starty))) //Check if in the same y plane with rstick
-	|| (fabs(game->rstick.startx-game->ball.startx) < BALL_WIDTH+2 //Same thing but as above but with rstick
-	&& ((game->rstick.starty >= game->ball.starty-RIGHT_STICK_HEIGHT-BALL_HEIGHT) && (game->rstick.starty <= game->ball.starty))))
+	if(
+	//Checks LSTICK with ball
+	(fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+LEFT_STICK_WIDTH-1 //Check if in the same x plane with ball
+	&& ((game->lstick.starty >= game->ball.starty-LEFT_STICK_HEIGHT-BALL_HEIGHT) //Check if in the same y plane with ball
+	&& (game->lstick.starty <= game->ball.starty)))
+	|| //Checks RSTICK with ball
+	(fabs(game->rstick.startx-game->ball.startx) < BALL_WIDTH+2 //Check if in the same x plane with ball
+	&& ((game->rstick.starty >= game->ball.starty-RIGHT_STICK_HEIGHT-BALL_HEIGHT) //Check if in the same y plane with ball
+	&& (game->rstick.starty <= game->ball.starty))))
 	{
 		if( fabs(game->ball_velocity_y) > BALL_START_SPEED_Y*3 ){ //Make sure we Don't go faster than 3 * Start speed in the y direction
  			//Set gameball_velocity_y to BALL_START_SPEED_Y, but the same direction/sign
