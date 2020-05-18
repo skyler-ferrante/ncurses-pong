@@ -423,16 +423,21 @@ void stop_ball_horizontal(PONG_GAME *game){
 	sleep(1);
 }
 
+bool checkIfBallTouchingLeftStick(PONG_GAME *game){
+	return fabs(game->lstick.startx - game->ball.startx) < BALL_WIDTH + LEFT_STICK_WIDTH - 1 //Check if in the same x plane with ball
+	&&     fabs(game->lstick.starty - game->ball.starty) <= BALL_HEIGHT + LEFT_STICK_HEIGHT; //Check if in the same y plane with ball
+}
+
+bool checkIfBallTouchingRightStick(PONG_GAME *game){
+	return fabs(game->rstick.startx - game->ball.startx) < BALL_WIDTH + 2 //Check if in the same x plane with ball
+	&&     fabs(game->rstick.starty - game->ball.starty) <= BALL_HEIGHT + RIGHT_STICK_HEIGHT; //Check if in the same y plane with ball
+}
+
 void bounce_ball_off_stick(PONG_GAME *game){
 	if(
-	//Checks LSTICK with ball
-	(fabs(game->lstick.startx-game->ball.startx)<BALL_WIDTH+LEFT_STICK_WIDTH-1 //Check if in the same x plane with ball
-	&& ((game->lstick.starty >= game->ball.starty-LEFT_STICK_HEIGHT-BALL_HEIGHT) //Check if in the same y plane with ball
-	&& (game->lstick.starty <= game->ball.starty)))
-	|| //Checks RSTICK with ball
-	(fabs(game->rstick.startx-game->ball.startx) < BALL_WIDTH+2 //Check if in the same x plane with ball
-	&& ((game->rstick.starty >= game->ball.starty-RIGHT_STICK_HEIGHT-BALL_HEIGHT) //Check if in the same y plane with ball
-	&& (game->rstick.starty <= game->ball.starty))))
+	checkIfBallTouchingLeftStick(game)
+	||
+	checkIfBallTouchingRightStick(game))
 	{
 		if( fabs(game->ball_velocity_y) > BALL_START_SPEED_Y*3 ){ //Make sure we Don't go faster than 3 * Start speed in the y direction
  			//Set gameball_velocity_y to BALL_START_SPEED_Y, but the same direction/sign
