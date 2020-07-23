@@ -4,17 +4,21 @@
 #include <math.h>
 #include <time.h>
 
+#define left_right_border_ch	'|'
+#define top_bottom_border_ch	'-'
+#define corners_ch		'+'
+
 typedef struct _WIN_struct {
 	double startx, starty;
-	int height, width;
-	int colorp;
+	unsigned short height, width;
+	unsigned short colorp;
 }WIN;
 
 typedef struct pong_game_struct {
 	float ball_velocity_x, ball_velocity_y;
-	int rscore;
-	int lscore;
-	int bounces;
+	unsigned short rscore;
+	unsigned short lscore;
+	unsigned short bounces;
 	bool is_done;
 	WIN lstick;
 	WIN rstick;
@@ -33,7 +37,8 @@ void update_sticks(PONG_GAME *game,int ch);
 void update_ball(PONG_GAME *game);
 void end_message(int lscore,int rscore,int bounces);
 
-int LEFT_STICK_HEIGHT = 12; //May want to change these based on arguments
+//I was going to make these defines but then I would not be able to change them based on arguments
+int LEFT_STICK_HEIGHT = 12;
 int RIGHT_STICK_HEIGHT = 12;
 int LEFT_STICK_WIDTH = 1;
 int RIGHT_STICK_WIDTH = 1;
@@ -43,10 +48,6 @@ const int MAX_BOUNCE_ANGLE = 75;
 const double BALL_START_SPEED_X = .5;
 const double BALL_START_SPEED_Y = .15;
 bool PRACTICE_MODE = false;
-
-const chtype left_right_border_ch = '|';
-const chtype top_bottom_border_ch = '-';
-const chtype corners_ch = '+';
 
 int main(int argc, char **argv)
 {
@@ -193,7 +194,7 @@ void print_intro(){
 
 	getch();
 	clear();
-	nodelay(stdscr,TRUE); //I wanted to put this in init_ncurses but then we could not pause during this function
+	nodelay(stdscr,TRUE); //I wanted to put this in init_ncurses but then we could not pause at the above getch
 }
 
 void end_message(int lscore,int rscore,int bounces){
