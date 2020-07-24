@@ -58,13 +58,13 @@ int main(int argc, char **argv)
 	PONG_GAME game;
 	init_game(&game);
 
-	int ch; //For user input in while loop
+	int ch;
 	while((ch = getch()) != 27 && !game.is_done)
 	{
 		if(ch != (int)'p'){
 			create_box(&game.ball,FALSE); //Ball is the only thing cleared and drawn every frame
-			update_sticks(&game,ch);
 			update_ball(&game);
+			update_sticks(&game,ch);
 			draw_screen(&game);
 			usleep(7000);
 		}else{
@@ -75,7 +75,6 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	printf("ESC was pressed\n");
 	end_message(game.lscore,game.rscore,game.bounces);
 	return 0;
 }
@@ -400,21 +399,7 @@ void stop_ball_vertical(PONG_GAME *game){
 	}
 }
 
-void stop_ball_horizontal(PONG_GAME *game){
-	if(game->ball.startx < -BALL_WIDTH-5){
-		game->rscore++;
-		usleep(200000);
-	}
-	else if(game->ball.startx > COLS+BALL_WIDTH+5){
-		game->lscore++;
-		usleep(200000);
-	}else{
-		return;
-	}
-	if(game->rscore>=5 || game->lscore>=5){
-		game->is_done = true;
-		return;
-	}		
+void hit_horizontal_wall(PONG_GAME *game){
 	create_box(&game->ball,FALSE); //undraw ball before moving
 	game->ball.startx = COLS/2 - BALL_WIDTH/2;
 	srand(time(0));
@@ -423,6 +408,23 @@ void stop_ball_horizontal(PONG_GAME *game){
 	draw_screen(game);
 	refresh();
 	sleep(1);
+}
+
+void stop_ball_horizontal(PONG_GAME *game){
+	if(game->ball.startx < -BALL_WIDTH-5){
+		game->rscore++;
+		hit_horizontal_wall(game);
+	}
+	else if(game->ball.startx > COLS+BALL_WIDTH+5){
+		game->lscore++;
+		hit_horizontal_wall(game);
+	}else{
+		return;
+	}
+	if(game->rscore>=5 || game->lscore>=5){
+		game->is_done = true;
+		return;
+	}	
 }
 
 bool checkIfBallTouchingLeftStick(PONG_GAME *game){
