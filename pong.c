@@ -1,5 +1,5 @@
 #include <ncurses.h>
-#include<stdlib.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
@@ -45,7 +45,7 @@ int RIGHT_STICK_WIDTH = 1;
 int BALL_WIDTH = 3;
 int BALL_HEIGHT = 1;
 
-int timer;
+int timer; //Used to make game go faster over time
 
 const int MAX_BOUNCE_ANGLE = 75;
 const double BALL_START_SPEED_X = .5;
