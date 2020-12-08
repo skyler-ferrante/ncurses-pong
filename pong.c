@@ -8,13 +8,13 @@
 #define top_bottom_border_ch	'-'
 #define corners_ch		'+'
 
-typedef struct _WIN_struct {
+typedef struct{
 	double startx, starty;
 	unsigned short height, width;
 	unsigned short colorp;
 }WIN;
 
-typedef struct pong_game_struct {
+typedef struct{
 	float ball_velocity_x, ball_velocity_y;
 	unsigned short rscore;
 	unsigned short lscore;
