@@ -381,10 +381,10 @@ void update_sticks_position(PONG_GAME *game,int ch){
 	}
 	if(PRACTICE_MODE){
 		if(game->ball.starty-RIGHT_STICK_WIDTH/2-BALL_WIDTH/2 > game->rstick.starty){
-			change_amount_rstick += 3;
+			change_amount_rstick += BALL_WIDTH/2;
 		}
 		else if(game->ball.starty-RIGHT_STICK_WIDTH/2+BALL_WIDTH/2 < game->rstick.starty){
-			change_amount_rstick -= 3;
+			change_amount_rstick -= BALL_WIDTH/2;
 		}
 	}
 	if(change_amount_lstick != 0){
