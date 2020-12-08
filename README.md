@@ -34,5 +34,3 @@ Screenshots:
 ![Image1](images/image3.png)
 
 ![Image1](images/image2.png)
-
-(Will not work in WSL)
