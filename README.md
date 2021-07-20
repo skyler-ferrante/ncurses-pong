@@ -5,27 +5,27 @@ Make sure you have the ncurses library
 
 To install use
 
-    $ sudo apt-get install libncurses5-dev 
+    sudo apt-get install libncurses5-dev 
     
 To compile use 
 
-    $  make
+    make
 
 To use
 
-    $ ./pong
+    ./pong
 
 To use another color set (6 in total) give -number
 
-    $ ./pong -2 
+    ./pong -2 
 
-    $ ./pong -3
+    ./pong -3
 
 To use practice mode (one player mode) give -p (before number)
 
-    $ ./pong -p
+    ./pong -p
 
-    $ ./pong -p2
+    ./pong -p2
 
 Screenshots:
 
