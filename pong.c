@@ -79,6 +79,7 @@ int main(int argc, char **argv)
 				if(ch == 27){
 					game.is_done = true;
 				}
+				usleep(10000);
 			}
 		}
 	}
