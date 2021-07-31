@@ -6,13 +6,13 @@
 
 #define left_right_border_ch	'|'
 #define top_bottom_border_ch	'-'
-#define corners_ch		'+'
+#define corners_ch				'+'
 
 typedef struct{
 	double startx, starty;
 	unsigned short height, width;
 	unsigned short colorp;
-}WIN;
+}RECTANGLE;
 
 typedef struct{
 	float ball_velocity_x, ball_velocity_y;
@@ -20,11 +20,11 @@ typedef struct{
 	unsigned short lscore;
 	unsigned short bounces;
 	bool is_done;
-	WIN lstick;
-	WIN rstick;
-	WIN ball;
-	WIN middle_line;
-	WIN outer_line;
+	RECTANGLE lstick;
+	RECTANGLE rstick;
+	RECTANGLE ball;
+	RECTANGLE middle_line;
+	RECTANGLE outer_line;
 }PONG_GAME;
 
 void init_ncurses();
@@ -32,7 +32,7 @@ void get_arguments();
 void print_intro();
 void init_game(PONG_GAME *game);
 void run_game(PONG_GAME *game);
-void create_box(WIN *p_win,bool FLAG);
+void create_box(RECTANGLE *p_win,bool FLAG);
 void draw_screen(PONG_GAME *game);
 void update_sticks(PONG_GAME *game,int ch);
 void update_ball(PONG_GAME *game);
@@ -68,7 +68,7 @@ void fill_area(int x, int y, int w, int h){
 			mvaddch(j, i, ' ');
 }
 
-void fill_win(WIN *p_win)
+void fill_win(RECTANGLE *p_win)
 {
 	attron(COLOR_PAIR(p_win->colorp));
 	fill_area(p_win->startx+1,p_win->starty+1,p_win->width-2,p_win->height-2);
@@ -238,7 +238,7 @@ void end_message(int lscore,int rscore,int bounces){
 	printf("%i bounces\n",bounces);
 }
 
-void init_stick(WIN *p_win)
+void init_stick(RECTANGLE *p_win)
 {
 	p_win->height = STICK_HEIGHT;
 	p_win->width =  STICK_WIDTH;
@@ -247,7 +247,7 @@ void init_stick(WIN *p_win)
 	p_win->colorp = 3;
 }
 
-void init_ball(WIN *p_win)
+void init_ball(RECTANGLE *p_win)
 {
 	p_win->height = BALL_HEIGHT;
 	p_win->width = BALL_WIDTH;
@@ -256,7 +256,7 @@ void init_ball(WIN *p_win)
 	p_win->colorp = 2;
 }
 
-void init_middle_line(WIN *p_win)
+void init_middle_line(RECTANGLE *p_win)
 {
 	p_win->height = LINES+2;
 	p_win->width = 2;
@@ -265,7 +265,7 @@ void init_middle_line(WIN *p_win)
 	p_win->colorp = 4;
 }
 
-void init_outer_line(WIN *p_win)
+void init_outer_line(RECTANGLE *p_win)
 {
 	p_win->height = LINES-1;
 	p_win->width = COLS-1;
@@ -274,7 +274,7 @@ void init_outer_line(WIN *p_win)
 	p_win->colorp = 4;
 }
 
-void create_box(WIN *p_win, bool flag)
+void create_box(RECTANGLE *p_win, bool flag)
 {
 	double x,y,w,h;
 	x = p_win->startx;
@@ -344,7 +344,7 @@ void draw_screen(PONG_GAME *game){
 	create_box(&game->ball,TRUE); //Draws ball
 }
 
-void set_stick_pos(WIN *stick,int new_height){
+void set_stick_pos(RECTANGLE *stick,int new_height){
 	stick->starty = new_height;
 	create_box(stick,TRUE);
 }
