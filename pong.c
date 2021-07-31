@@ -91,11 +91,12 @@ void get_arguments(int argc,char *argv[]){
 	//-p makes right stick take the entire screen and redirects inputs from key up/down to left player
 	int c;
 	bool colors_set = false;
-	while((c = getopt(argc,argv,"p123456")) != -1){
+	while((c = getopt(argc,argv,"p123456h")) != -1){
 		switch(c){
 			case 'p':
 				PRACTICE_MODE = true;
 				break;
+			case '1': break;
 			case '2':
 				init_pair(1, COLOR_CYAN, COLOR_BLACK);
 				init_pair(2, COLOR_CYAN, COLOR_BLACK);
@@ -141,6 +142,16 @@ void get_arguments(int argc,char *argv[]){
 				BALL_HEIGHT = 4;
 				colors_set = true;
 				break;
+			case 'h':
+				endwin();
+				printf("To select color, use -1 through -6\n");
+				printf("To select practice mode (one player), use -p\n");
+				exit(1);
+			default:
+				endwin();
+				printf("Unknown Command Argument\n");
+				printf("-h to get options\n");
+				exit(1);
 		}
 	}
 	if(!colors_set){
