@@ -37,11 +37,8 @@ void update_sticks(PONG_GAME *game,int ch);
 void update_ball(PONG_GAME *game);
 void end_message(int lscore,int rscore,int bounces);
 
-//I was going to make these defines but then I would not be able to change them based on arguments
-int LEFT_STICK_HEIGHT = 12;
-int RIGHT_STICK_HEIGHT = 12;
-int LEFT_STICK_WIDTH = 1;
-int RIGHT_STICK_WIDTH = 1;
+int STICK_HEIGHT = 12;
+int STICK_WIDTH = 1;
 int BALL_WIDTH = 3;
 int BALL_HEIGHT = 1;
 
@@ -69,12 +66,12 @@ int main(int argc, char **argv)
 			create_box(&game.ball,FALSE); //Ball is the only thing cleared and drawn every frame
 			update_ball(&game);
 			update_sticks(&game,ch);
-			draw_screen(&game);
+			draw_screen(&game); //Draw Ball, Middle Line, and Text
 			usleep(8000-timer); //Sleeps for less time until score
 			if(timer<5000){
 				timer+=1;
 			}
-		}else{
+		}else{ //Pause screen
 			while((ch = getch()) != (int)'p' && !game.is_done){
 				if(ch == 27){
 					game.is_done = true;
@@ -120,7 +117,6 @@ void get_arguments(int argc,char *argv[]){
 		switch(c){
 			case 'p':
 				PRACTICE_MODE = true;
-				//RIGHT_STICK_HEIGHT = LINES-3;
 				break;
 			case '2':
 				init_pair(1, COLOR_CYAN, COLOR_BLACK);
@@ -228,10 +224,10 @@ void end_message(int lscore,int rscore,int bounces){
 	printf("%i bounces\n",bounces);
 }
 
-void init_stick(WIN *p_win,bool isLeft)
+void init_stick(WIN *p_win)
 {
-	p_win->height = (isLeft) ? LEFT_STICK_HEIGHT : RIGHT_STICK_HEIGHT;
-	p_win->width = (isLeft) ? LEFT_STICK_WIDTH : RIGHT_STICK_WIDTH;
+	p_win->height = STICK_HEIGHT;
+	p_win->width =  STICK_WIDTH;
 	p_win->starty = (LINES - p_win->height)/2;
 	p_win->startx = (COLS - p_win->width);
 	p_win->colorp = 3;
@@ -297,10 +293,10 @@ void init_game(PONG_GAME *game){
 	game->bounces = 0;
 	game->is_done = false;
 
-	init_stick(&game->lstick,TRUE);
+	init_stick(&game->lstick);
 	game->lstick.startx = game->lstick.startx*.125;
 
-	init_stick(&game->rstick,FALSE);
+	init_stick(&game->rstick);
 	game->rstick.startx = game->rstick.startx*.875;
 
 	init_ball(&game->ball);
@@ -320,20 +316,15 @@ void init_game(PONG_GAME *game){
 	create_box(&game->outer_line,TRUE);
 }
 
-void update_screen_sise(PONG_GAME *game){
-	game->middle_line.height = LINES;
-	game->outer_line.height = LINES;
-	game->outer_line.height = COLS;
-}
-
 void draw_screen(PONG_GAME *game){
+	//Draw Text
 	attron(COLOR_PAIR(1));
 	mvprintw(1,2,"Press ESC to exit");
 	mvprintw(2,2,"%i",game->lscore);
 	mvprintw(2,COLS-2,"%i",game->rscore);
 	attroff(COLOR_PAIR(1));
 
-	if(abs(game->ball.startx-game->middle_line.startx) < 5){
+	if(abs(game->ball.startx-game->middle_line.startx) < 5){ //If ball near middle line
 		create_box(&game->middle_line,TRUE); //Draws middle line
 	}
 	create_box(&game->ball,TRUE); //Draws ball
@@ -346,16 +337,16 @@ void set_stick_pos(WIN *stick,int new_height){
 
 void stop_sticks_from_going_off_screen(PONG_GAME *game){
 	//LEFT
-	if(game->lstick.starty > LINES-LEFT_STICK_HEIGHT-3){
-		set_stick_pos(&game->lstick,LINES-LEFT_STICK_HEIGHT-3);
+	if(game->lstick.starty > LINES-STICK_HEIGHT-3){
+		set_stick_pos(&game->lstick,LINES-STICK_HEIGHT-3);
 	}
 	else if(game->lstick.starty < 2){
 		set_stick_pos(&game->lstick,2);
 	}
 
 	//RIGHT
-	if(game->rstick.starty > LINES-RIGHT_STICK_HEIGHT-3){
-		set_stick_pos(&game->rstick,LINES-RIGHT_STICK_HEIGHT-3);
+	if(game->rstick.starty > LINES-STICK_HEIGHT-3){
+		set_stick_pos(&game->rstick,LINES-STICK_HEIGHT-3);
 	}
 	else if(game->rstick.starty < 2){
 		set_stick_pos(&game->rstick,2);
@@ -388,14 +379,16 @@ void update_sticks_position(PONG_GAME *game,int ch){
 			}
 			break;
 	}
+	
 	if(PRACTICE_MODE){
-		if(game->ball.starty-RIGHT_STICK_WIDTH/2-BALL_WIDTH/2 > game->rstick.starty){
+		if(game->ball.starty-STICK_WIDTH/2-BALL_WIDTH/2 > game->rstick.starty){
 			change_amount_rstick += BALL_WIDTH/2;
 		}
-		else if(game->ball.starty-RIGHT_STICK_WIDTH/2+BALL_WIDTH/2 < game->rstick.starty){
+		else if(game->ball.starty-STICK_WIDTH/2+BALL_WIDTH/2 < game->rstick.starty){
 			change_amount_rstick -= BALL_WIDTH/2;
 		}
 	}
+	
 	if(change_amount_lstick != 0){
 		create_box(&game->lstick,FALSE);
 		game->lstick.starty += change_amount_lstick;
@@ -457,15 +450,13 @@ void stop_ball_horizontal(PONG_GAME *game){
 }
 
 bool checkIfBallTouchingLeftStick(PONG_GAME *game){
-	return fabs(game->lstick.startx - game->ball.startx) < BALL_WIDTH + LEFT_STICK_WIDTH - 1 //Check if in the same x plane with ball
-	&&     fabs( (game->lstick.starty+(LEFT_STICK_HEIGHT/2)) - game->ball.starty)-BALL_HEIGHT
-		< LEFT_STICK_HEIGHT/2;
+	return fabs(game->lstick.startx - game->ball.startx) < BALL_WIDTH + STICK_WIDTH - 1 //Check if in the same x plane with ball
+	&&     fabs( (game->lstick.starty+(STICK_HEIGHT/2)) - game->ball.starty)-BALL_HEIGHT < STICK_HEIGHT/2;
 }
 
 bool checkIfBallTouchingRightStick(PONG_GAME *game){
-	return fabs(game->rstick.startx - game->ball.startx) < BALL_WIDTH + RIGHT_STICK_WIDTH + 2 //Check if in the same x plane with ball
-	&&     fabs( (game->rstick.starty+(RIGHT_STICK_HEIGHT/2)) - game->ball.starty)-BALL_HEIGHT
-		< RIGHT_STICK_HEIGHT/2;
+	return fabs(game->rstick.startx - game->ball.startx) < BALL_WIDTH + STICK_WIDTH + 2 //Check if in the same x plane with ball
+	&&     fabs( (game->rstick.starty+(STICK_HEIGHT/2)) - game->ball.starty)-BALL_HEIGHT < STICK_HEIGHT/2;
 }
 
 void bounce_helper(PONG_GAME *game,bool onright){
@@ -477,7 +468,6 @@ void bounce_helper(PONG_GAME *game,bool onright){
 
 		(onright) ? create_box(&game->rstick,TRUE) : create_box(&game->lstick,TRUE);
 		game->bounces++;
-		//refresh();
 }
 
 double find_multiplier(double stick_starty,double ball_starty,int stick_height){
@@ -488,19 +478,17 @@ double find_multiplier(double stick_starty,double ball_starty,int stick_height){
 
 void bounce_ball_off_stick(PONG_GAME *game){
 	if(checkIfBallTouchingLeftStick(game)){
-		game->ball_velocity_y = find_multiplier(game->lstick.starty,game->ball.starty,LEFT_STICK_HEIGHT)*.2;
+		game->ball_velocity_y = find_multiplier(game->lstick.starty,game->ball.starty,STICK_HEIGHT)*.2;
 		bounce_helper(game,false);
 	}else if(checkIfBallTouchingRightStick(game)){
-		game->ball_velocity_y = find_multiplier(game->rstick.starty,game->ball.starty,RIGHT_STICK_HEIGHT)*.2;
+		game->ball_velocity_y = find_multiplier(game->rstick.starty,game->ball.starty,STICK_HEIGHT)*.2;
 		bounce_helper(game,true);
 	}
 }
 
 void bounce_ball_off_stickDiff(PONG_GAME *game){
-	if(
-	checkIfBallTouchingLeftStick(game)
-	||
-	checkIfBallTouchingRightStick(game))
+	if(checkIfBallTouchingLeftStick(game)	||
+	   checkIfBallTouchingRightStick(game))
 	{
 		if( fabs(game->ball_velocity_y) > BALL_START_SPEED_Y*3 ){ //Make sure we Don't go faster than 3 * Start speed in the y direction
  			//Set gameball_velocity_y to BALL_START_SPEED_Y, but the same direction/sign
