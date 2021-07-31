@@ -4,9 +4,9 @@
 #include <math.h>
 #include <time.h>
 
-#define left_right_border_ch		'|'
-#define top_bottom_border_ch		'-'
-#define corners_ch					'+'
+#define left_right_border_ch	'|'
+#define top_bottom_border_ch	'-'
+#define corners_ch		'+'
 
 typedef struct{
 	double startx, starty;
