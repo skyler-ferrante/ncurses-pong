@@ -31,6 +31,7 @@ void init_ncurses();
 void get_arguments();
 void print_intro();
 void init_game(PONG_GAME *game);
+void run_game(PONG_GAME *game);
 void create_box(WIN *p_win,bool FLAG);
 void draw_screen(PONG_GAME *game);
 void update_sticks(PONG_GAME *game,int ch);
@@ -57,31 +58,8 @@ int main(int argc, char **argv)
 
 	PONG_GAME game;
 	init_game(&game);
-
-	int ch;
-	timer = 0;
-	while((ch = getch()) != 27 && !game.is_done)
-	{
-		if(ch != (int)'p'){
-			create_box(&game.ball,FALSE); //Ball is the only thing cleared and drawn every frame
-			update_ball(&game);
-			update_sticks(&game,ch);
-			draw_screen(&game); //Draw Ball, Middle Line, and Text
-			usleep(8000-timer); //Sleeps for less time until score
-			if(timer<5000){
-				timer+=1;
-			}
-		}else{ //Pause screen
-			while((ch = getch()) != (int)'p' && !game.is_done){
-				if(ch == 27){
-					game.is_done = true;
-				}
-				usleep(10000);
-			}
-		}
-	}
+	run_game(&game);
 	end_message(game.lscore,game.rscore,game.bounces);
-	return 0;
 }
 
 void fill_area(int x, int y, int w, int h){
@@ -206,6 +184,31 @@ void print_intro(){
 	getch();
 	clear();
 	nodelay(stdscr,TRUE); //I wanted to put this in init_ncurses but then we could not pause at the above getch
+}
+
+void run_game(PONG_GAME *game){
+	int ch;
+	timer = 0;
+	while((ch = getch()) != 27 && !game->is_done)
+	{
+		if(ch != (int)'p'){
+			create_box(&game->ball,FALSE); //Ball is the only thing cleared and drawn every frame
+			update_ball(game);
+			update_sticks(game,ch);
+			draw_screen(game); //Draw Ball, Middle Line, and Text
+			usleep(8000-timer); //Sleeps for less time until score
+			if(timer<5000){
+				timer+=1;
+			}
+		}else{ //Pause screen
+			while((ch = getch()) != (int)'p' && !game->is_done){
+				if(ch == 27){
+					game->is_done = true;
+				}
+				usleep(10000);
+			}
+		}
+	}
 }
 
 void end_message(int lscore,int rscore,int bounces){
