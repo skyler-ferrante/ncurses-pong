@@ -115,6 +115,7 @@ void get_arguments(int argc,char *argv[]){
 	//Color pair 5 is for clearing screen 
 	//-p makes right stick take the entire screen and redirects inputs from key up/down to left player
 	int c;
+	bool colors_set = false;
 	while((c = getopt(argc,argv,"p123456")) != -1){
 		switch(c){
 			case 'p':
@@ -128,21 +129,24 @@ void get_arguments(int argc,char *argv[]){
 				init_pair(4, COLOR_RED, COLOR_BLACK);
 				init_pair(5, COLOR_RED, COLOR_BLACK);
 				BALL_HEIGHT = 2;
-				return;
+				colors_set = true;
+				break;
 			case '3':
 				init_pair(1, COLOR_WHITE, COLOR_GREEN);
 				init_pair(2, COLOR_WHITE, COLOR_WHITE);
 				init_pair(3, COLOR_WHITE, COLOR_WHITE);
 				init_pair(4, COLOR_WHITE, COLOR_WHITE);
 				init_pair(5, COLOR_WHITE, COLOR_GREEN);
-				return;
+				colors_set = true;
+				break;
 			case '4':
 				init_pair(1, COLOR_WHITE, COLOR_BLACK);	
 				init_pair(2, COLOR_WHITE, COLOR_WHITE);
 				init_pair(3, COLOR_WHITE, COLOR_WHITE);
 				init_pair(4, COLOR_WHITE, COLOR_WHITE);
 				init_pair(5, COLOR_WHITE, COLOR_BLACK);
-				return;
+				colors_set = true;
+				break;
 			case '5':
 				init_pair(1, COLOR_BLACK, COLOR_WHITE);	
 				init_pair(2, COLOR_RED, COLOR_RED);
@@ -151,7 +155,8 @@ void get_arguments(int argc,char *argv[]){
 				init_pair(5, COLOR_WHITE, COLOR_WHITE); 
 				BALL_WIDTH = 2;
 				BALL_HEIGHT = 1;
-				return;
+				colors_set = true;
+				break;
 			case '6': //More for testing edge cases than anything
 				init_pair(1, COLOR_BLACK, COLOR_YELLOW);
 				init_pair(2, COLOR_BLACK, COLOR_RED);
@@ -160,14 +165,17 @@ void get_arguments(int argc,char *argv[]){
 				init_pair(5, COLOR_BLACK, COLOR_BLACK); 
 				BALL_WIDTH = 4;
 				BALL_HEIGHT = 4;
-				return;
+				colors_set = true;
+				break;
 		}
 	}
-	init_pair(1, COLOR_WHITE, COLOR_BLUE);
-	init_pair(2, COLOR_WHITE, COLOR_WHITE);
-	init_pair(3, COLOR_WHITE, COLOR_WHITE);
-	init_pair(4, COLOR_WHITE, COLOR_WHITE);
-	init_pair(5, COLOR_WHITE, COLOR_BLUE);
+	if(!colors_set){
+		init_pair(1, COLOR_WHITE, COLOR_BLUE);
+		init_pair(2, COLOR_WHITE, COLOR_WHITE);
+		init_pair(3, COLOR_WHITE, COLOR_WHITE);
+		init_pair(4, COLOR_WHITE, COLOR_WHITE);
+		init_pair(5, COLOR_WHITE, COLOR_BLUE);
+	}
 }
 
 void init_ncurses(){
