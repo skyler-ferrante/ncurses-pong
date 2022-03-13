@@ -338,7 +338,7 @@ void draw_screen(PONG_GAME *game){
 	mvprintw(2,COLS-2,"%i",game->rscore);
 	attroff(COLOR_PAIR(1));
 
-	if(abs(game->ball.startx-game->middle_line.startx) < 5){ //If ball near middle line
+	if(fabs(game->ball.startx-game->middle_line.startx) < 5){ //If ball near middle line
 		create_box(&game->middle_line,TRUE); //Draws middle line
 	}
 	create_box(&game->ball,TRUE); //Draws ball
