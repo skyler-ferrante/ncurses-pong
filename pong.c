@@ -463,14 +463,17 @@ void stop_ball_horizontal(PONG_GAME *game){
 	timer = 0;
 }
 
+bool checkIfBallTouchingStick(RECTANGLE stick, RECTANGLE ball, int shift){
+	return fabs(stick.startx - ball.startx) < BALL_WIDTH + STICK_WIDTH + shift //Check if in the same x plane with ball
+	&&     fabs( (stick.starty+(STICK_HEIGHT/2)) - ball.starty)-BALL_HEIGHT < STICK_HEIGHT/2;
+}
+
 bool checkIfBallTouchingLeftStick(PONG_GAME *game){
-	return fabs(game->lstick.startx - game->ball.startx) < BALL_WIDTH + STICK_WIDTH - 1 //Check if in the same x plane with ball
-	&&     fabs( (game->lstick.starty+(STICK_HEIGHT/2)) - game->ball.starty)-BALL_HEIGHT < STICK_HEIGHT/2;
+	return checkIfBallTouchingStick(game->lstick, game->ball, -1);
 }
 
 bool checkIfBallTouchingRightStick(PONG_GAME *game){
-	return fabs(game->rstick.startx - game->ball.startx) < BALL_WIDTH + STICK_WIDTH + 2 //Check if in the same x plane with ball
-	&&     fabs( (game->rstick.starty+(STICK_HEIGHT/2)) - game->ball.starty)-BALL_HEIGHT < STICK_HEIGHT/2;
+	return checkIfBallTouchingStick(game->rstick, game->ball, 1);
 }
 
 void bounce_helper(PONG_GAME *game,bool onright){
@@ -508,9 +511,7 @@ void bounce_ball_off_stickDiff(PONG_GAME *game){
  			//Set gameball_velocity_y to BALL_START_SPEED_Y, but the same direction/sign
 			game->ball_velocity_y = ( game->ball_velocity_y < 0 ) ? -BALL_START_SPEED_Y : BALL_START_SPEED_Y;
 		}
-		if(game->ball.startx < game->lstick.startx){ 
-		}else if(game->ball.startx > game->rstick.startx){
-		}
+
 		//See which half we are on, just to make sure we don't go the wrong way
 		bool on_right = (game->ball.startx>COLS/2);
 		int temp = (on_right) ? 1 : -1;
