@@ -62,23 +62,15 @@ int main(int argc, char **argv)
 	end_message(game.lscore,game.rscore,game.bounces);
 }
 
-void fill_area(int x, int y, int w, int h){
+void clear_area(int x,int y, int w, int h)
+{
+	// Set background color
+	attron(COLOR_PAIR(5));
+
 	for(int j = y; j <= y + h; ++j)
 		for(int i = x; i <= x + w; ++i)
 			mvaddch(j, i, ' ');
-}
 
-void fill_win(RECTANGLE *p_win)
-{
-	attron(COLOR_PAIR(p_win->colorp));
-	fill_area(p_win->startx+1,p_win->starty+1,p_win->width-2,p_win->height-2);
-	attroff(COLOR_PAIR(p_win->colorp));
-}
-
-void clear_area(int x,int y, int w, int h)
-{
-	attron(COLOR_PAIR(5));
-	fill_area(x,y,w,h);
 	attroff(COLOR_PAIR(5));
 }
 
