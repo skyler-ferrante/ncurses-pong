@@ -8,6 +8,9 @@
 #define top_bottom_border_ch	'-'
 #define corners_ch		'+'
 
+// Time to sleep gets lower over time
+#define START_SLEEP_TIME 8000
+
 typedef struct{
 	double startx, starty;
 	unsigned short height, width;
@@ -199,7 +202,7 @@ void run_game(PONG_GAME *game){
 			update_ball(game);
 			update_sticks(game,ch);
 			draw_screen(game); //Draw Ball, Middle Line, and Text
-			usleep(8000-timer); //Sleeps for less time until score
+			usleep(START_SLEEP_TIME-timer); //Sleeps for less time until score
 			if(timer<5000){
 				timer+=1;
 			}
@@ -208,7 +211,7 @@ void run_game(PONG_GAME *game){
 				if(ch == 27){
 					game->is_done = true;
 				}
-				usleep(10000);
+				usleep(START_SLEEP_TIME);
 			}
 		}
 	}
@@ -432,9 +435,29 @@ void hit_horizontal_wall(PONG_GAME *game){
 	srand(time(0));
 	game->ball.starty = LINES/2 + LINES*.2*pow(-1,rand());
 	game->ball_velocity_y = BALL_START_SPEED_Y * pow(-1,rand());
-	draw_screen(game);
-	refresh(); //We don't want to see the ball while sleeping
-	sleep(1);
+
+	time_t start, curr;
+	time(&start);
+
+	int ch;
+	while( true ){
+		ch = getch();
+
+		update_sticks(game,ch);
+		usleep(START_SLEEP_TIME);
+		draw_screen(game);
+
+		// Handle ESC
+		if( ch == 27 ){
+			game->is_done = 1;
+			break;
+		}
+
+		time(&curr);
+		if( curr - start == 2 ){
+			break;
+		}
+	}
 }
 
 void stop_ball_horizontal(PONG_GAME *game){
