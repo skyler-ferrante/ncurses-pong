@@ -177,7 +177,7 @@ void print_intro(){
 	mvprintw(1,0,"Press any key to start");
 	mvprintw(2,0,"By Skyler Ferrante");
 
-	mvprintw(LINES/2,COLS/2-27.5,"88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,");
+	mvprintw(LINES/2,COLS/2-27.5,  "88888888ba     ,ad8888ba,    888b      88    ,ad8888ba,");
 	mvprintw(LINES/2+1,COLS/2-27.5,"88      \"8b   d8\"'    `\"8b   8888b     88   d8\"'    `\"8b");
 	mvprintw(LINES/2+2,COLS/2-27.5,"88      ,8P  d8'        `8b  88 `8b    88  d8'          ");
 	mvprintw(LINES/2+3,COLS/2-27.5,"88aaaaaa8P'  88          88  88  `8b   88  88            ");
@@ -397,14 +397,14 @@ void update_sticks_position(PONG_GAME *game,int ch){
 			change_amount_rstick -= BALL_WIDTH/2;
 		}
 	}
-	
+
 	if(change_amount_lstick != 0){
 		create_box(&game->lstick,FALSE);
 		game->lstick.starty += change_amount_lstick;
 		stop_sticks_from_going_off_screen(game);
 		create_box(&game->lstick,TRUE);
 	}
-	
+
 	if(change_amount_rstick != 0){
 		create_box(&game->rstick,FALSE);
 		game->rstick.starty += change_amount_rstick;
