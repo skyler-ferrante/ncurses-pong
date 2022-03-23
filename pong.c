@@ -230,7 +230,12 @@ void end_message(int lscore,int rscore,int bounces){
 		printf("Right player wins\n");
 	}
 	printf("Score was %i-%i\n",lscore,rscore);
-	printf("%i bounces\n",bounces);
+	
+	printf("%i bounce", bounces);
+	if( bounces != 1){
+		printf("s");
+	}
+	printf("\n");
 }
 
 void init_stick(RECTANGLE *p_win)
