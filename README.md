@@ -1,5 +1,8 @@
 # Ncurses-Pong
-A pong clone using ncurses
+
+A pong clone built using ncurses. To try without installing run (Windows or Linux): 
+    
+    ssh pong@pongssh.com
 
 Make sure you have the ncurses library
 
