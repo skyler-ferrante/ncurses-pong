@@ -1,0 +1,8 @@
+#!/bin/bash
+for i in goal ping pong wall ; do
+    v=${i}_wav
+    echo 'char *'$v' =' 
+    ffmpeg -v quiet -i $i.wav -f mp3 -acodec mp3 -ab 32k -  | base64 | sed -e 's/$/"/' -e 's/^/"/'
+    echo ';'
+    echo
+done > sounds.c

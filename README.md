@@ -37,3 +37,5 @@ Screenshots:
 ![Image1](images/image3.png)
 
 ![Image1](images/image2.png)
+
+This game can play with sounds. Use -s to enable. This works on Konsole 23.04 or newer.
