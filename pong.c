@@ -31,7 +31,7 @@ typedef struct{
 }PONG_GAME;
 
 void init_ncurses();
-void get_arguments();
+void get_arguments(int argc, char** argv);
 void print_intro();
 void init_game(PONG_GAME *game);
 void run_game(PONG_GAME *game);
