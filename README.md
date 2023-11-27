@@ -1,8 +1,11 @@
-# Ncurses-Pong
+# ncurses-pong
 
 A pong clone built using ncurses. To try without installing run (Windows or Linux): 
     
     ssh pong@pongssh.com
+
+![Animation](https://github.com/skyler-ferrante/ncurses-pong/assets/24577503/6d12641c-7e06-4058-91fc-3ea8aa0778b5)
+
 
 To install locally run
 
