@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
+#include "sounds.h"
 
 #define left_right_border_ch	'|'
 #define top_bottom_border_ch	'-'
@@ -52,6 +53,7 @@ const int MAX_BOUNCE_ANGLE = 75;
 const double BALL_START_SPEED_X = .5;
 const double BALL_START_SPEED_Y = .15;
 bool PRACTICE_MODE = false;
+bool SOUNDS = false;
 
 int main(int argc, char **argv)
 {
@@ -63,6 +65,11 @@ int main(int argc, char **argv)
 	init_game(&game);
 	run_game(&game);
 	end_message(game.lscore,game.rscore,game.bounces);
+}
+
+void play_sound(char *s) {
+    if(SOUNDS)
+        fprintf(stderr, "\x1b]1337;File=inlineMedia=1:%s\x07", s);
 }
 
 void clear_area(int x,int y, int w, int h)
@@ -86,8 +93,11 @@ void get_arguments(int argc,char *argv[]){
 	//-p makes right stick take the entire screen and redirects inputs from key up/down to left player
 	int c;
 	bool colors_set = false;
-	while((c = getopt(argc,argv,"p123456h")) != -1){
+	while((c = getopt(argc,argv,"sp123456h")) != -1){
 		switch(c){
+            case 's':
+                SOUNDS = true;
+                break;
 			case 'p':
 				PRACTICE_MODE = true;
 				break;
@@ -141,6 +151,7 @@ void get_arguments(int argc,char *argv[]){
 				endwin();
 				printf("To select color, use -1 through -6\n");
 				printf("To select practice mode (one player), use -p\n");
+                printf("To play sounds, use -s\n");
 				exit(1);
 			default:
 				endwin();
@@ -427,10 +438,12 @@ void stop_ball_vertical(PONG_GAME *game){
 	if(game->ball.starty > LINES-BALL_HEIGHT-1){ //Bottom
 		game->ball.starty = LINES-BALL_HEIGHT-2;
 		game->ball_velocity_y = -game->ball_velocity_y;
+        //play_sound(wall_wav);
 	}
 	if(game->ball.starty < 1){ //Top
 		game->ball.starty = 2;
 		game->ball_velocity_y = -game->ball_velocity_y;
+        //play_sound(wall_wav);
 	}
 }
 
@@ -468,10 +481,12 @@ void hit_horizontal_wall(PONG_GAME *game){
 void stop_ball_horizontal(PONG_GAME *game){
 	if(game->ball.startx < 2){
 		game->rscore++;
+        play_sound(goal_wav);
 		hit_horizontal_wall(game);
 	}
 	else if(game->ball.startx > COLS-BALL_WIDTH-2){
 		game->lscore++;
+        play_sound(goal_wav);
 		hit_horizontal_wall(game);
 	}else{
 		return;
@@ -505,6 +520,7 @@ void bounce_helper(PONG_GAME *game,bool onright){
 
 		(onright) ? create_box(&game->rstick,TRUE) : create_box(&game->lstick,TRUE);
 		game->bounces++;
+        play_sound(onright ? pong_wav : ping_wav);
 }
 
 double find_multiplier(double stick_starty,double ball_starty,int stick_height){

@@ -6,11 +6,16 @@ TARGET	:=pong
 
 .phony: run all clean
 
-
 all: ${TARGET}
 
-clean: 
-	rm -rf ${TARGET}
+sounds.c: sounds/makesounds
+	cd sounds ; ./makesounds ; mv sounds.c ..
 
-${TARGET}: % : %.c
+clean: 
+	rm -rf ${TARGET} sounds.o
+
+.c.o:
+	$(CC) -c  -I. $(CFLAGS) $(OPTIONS) $<
+
+${TARGET}: % : %.c sounds.o
 	${CXX} ${CXXFLAGS} $^ ${LDFLAGS}  -o $@
