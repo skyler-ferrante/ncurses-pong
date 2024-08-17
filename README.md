@@ -9,7 +9,7 @@ A pong clone built using ncurses. To try without installing run (Windows or Linu
 
 To install locally run
 
-    sudo apt-get install libncurses5-dev 
+    sudo apt-get install libncurses5-dev gcc make
     make
     ./pong
 
